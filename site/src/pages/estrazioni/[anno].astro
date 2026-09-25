@@ -57,8 +57,8 @@ const next = years[idx + 1];
   </div>
 
   <nav class="pager" aria-label="Altri anni">
-    {prev ? <a href={url(`estrazioni/${prev}`)}><Icon name="tail" size={20} flip /> {prev}</a> : <span></span>}
-    {next ? <a href={url(`estrazioni/${next}`)}>{next} <Icon name="tail" size={20} /></a> : <span></span>}
+    {prev ? <a href={url(`estrazioni/${prev}`)}><Icon name="arrow" size={20} flip /> {prev}</a> : <span></span>}
+    {next ? <a href={url(`estrazioni/${next}`)}>{next} <Icon name="arrow" size={20} /></a> : <span></span>}
   </nav>
 </Layout>
 

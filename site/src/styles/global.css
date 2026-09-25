@@ -15,6 +15,8 @@
   --banana: #f2c230;         /* solo superfici e marchi, mai testo su chiaro */
   --banana-ink: #3d2f00;
   --fur: #7a4a2a;
+  --icon-line: #1e1a16;      /* contorno delle icone */
+  --icon-halo: transparent;  /* alone delle sagome senza contorno */
 
   --series-1: #2a78d6;       /* dataviz: slot 1 (blu) */
   --series-muted: #cfcdc4;   /* neutro: "dentro la norma", il colore resta a chi esce dalla fascia */
@@ -43,6 +45,8 @@
     --series-muted: #54534e;
     --neg: #e66767;
     --band: #2e2e2b;
+    --icon-line: #efe4cf;
+    --icon-halo: #efe4cf;
   }
 }
 :root[data-theme="dark"] {
@@ -61,6 +65,8 @@
   --series-muted: #54534e;
   --neg: #e66767;
   --band: #2e2e2b;
+  --icon-line: #efe4cf;
+  --icon-halo: #efe4cf;
 }
 
 /* ---- base ----------------------------------------------------------- */

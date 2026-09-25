@@ -151,9 +151,9 @@ const description = `Numeri vincenti del SuperEnalotto di ${when} (concorso ${co
   </Verdict>
 
   <nav class="pager" aria-label="Altre estrazioni">
-    {prev ? <a href={url(drawPath(prev))}><Icon name="tail" size={20} flip /> {date(prev.date)}</a> : <span />}
+    {prev ? <a href={url(drawPath(prev))}><Icon name="arrow" size={20} flip /> {date(prev.date)}</a> : <span />}
     <a href={url(`estrazioni/${draw.date.slice(0, 4)}`)}>Tutto il {draw.date.slice(0, 4)}</a>
-    {next ? <a href={url(drawPath(next))}>{date(next.date)} <Icon name="tail" size={20} /></a> : <span />}
+    {next ? <a href={url(drawPath(next))}>{date(next.date)} <Icon name="arrow" size={20} /></a> : <span />}
   </nav>
 </Layout>
 
