@@ -20,6 +20,8 @@ from scimmia.models import Draw, DrawDetail, PrizeTier
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data" / "superenalotto"
 LEGACY_DIR = ROOT / "data" / "raw" / "tuttosuperenalotto"
+METEO_PATH = ROOT / "data" / "meteo" / "roma.csv"
+NAZIONALE_PATH = ROOT / "data" / "nazionale" / "italia.csv"
 
 DRAW_COLUMNS = ["id", "date", "contest", "n1", "n2", "n3", "n4", "n5", "n6", "jolly", "superstar", "source"]
 PRIZE_COLUMNS = ["draw_id", "game", "category", "winners", "amount_eur"]
@@ -78,6 +80,8 @@ class Store:
         if store.prizes_path.exists():
             with store.prizes_path.open(encoding="utf-8", newline="") as f:
                 for row in csv.DictReader(f):
+                    if not row["category"]:  # righe vuote salvate dalle prime versioni del parser
+                        continue
                     tiers.setdefault(row["draw_id"], []).append(
                         PrizeTier(row["game"], row["category"], int(row["winners"]), _opt_float(row["amount_eur"]))
                     )

@@ -1,0 +1,274 @@
+---
+import "../styles/global.css";
+import Icon from "../components/Icon.astro";
+import { summary } from "../lib/data";
+import { date, int, url } from "../lib/format";
+
+interface Props {
+  title: string;
+  description: string;
+  /** JSON-LD aggiuntivo specifico della pagina */
+  jsonLd?: Record<string, unknown>;
+  /** card Open Graph, relativa al sito (es. "og/numeri/17.png") */
+  ogImage?: string;
+}
+
+const { title, description, jsonLd, ogImage: og = "og/home.png" } = Astro.props;
+const SITE_NAME = "La Scimmia Vince";
+const fullTitle = title === SITE_NAME ? `${SITE_NAME} · il caso non ha memoria` : `${title} · ${SITE_NAME}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(url(og), Astro.site).href;
+const path = Astro.url.pathname;
+
+const nav = [
+  { href: url("numeri"), label: "Numeri" },
+  { href: url("se-avessi-giocato"), label: "Se avessi giocato" },
+  { href: url("ritardatari"), label: "Ritardatari" },
+  { href: url("correlazioni"), label: "Correlazioni" },
+  { href: url("estrazioni"), label: "Archivio" },
+  { href: url("metodo"), label: "Metodo" },
+];
+
+const graph = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: new URL(url(), Astro.site).href,
+    inLanguage: "it-IT",
+    description: "Statistiche oneste e ironiche sulle estrazioni del SuperEnalotto dal 1997 a oggi.",
+  },
+  ...(jsonLd ? [{ "@context": "https://schema.org", ...jsonLd }] : []),
+];
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={url("favicon.svg")} type="image/svg+xml" />
+    <link rel="icon" href={url("icons/icon-32.png")} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={url("icons/icon-180.png")} />
+    <link rel="manifest" href={url("manifest.webmanifest")} />
+    <link rel="sitemap" href={url("sitemap-index.xml")} />
+    <meta name="theme-color" content="#f2c230" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(graph)} />
+
+    <script is:inline>
+      try {
+        const t = localStorage.getItem("theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Vai al contenuto</a>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="logo" href={url()} aria-label="La Scimmia Vince, home">
+          <Icon name="monkey" size={40} />
+          <span>La Scimmia <strong>Vince</strong></span>
+        </a>
+        <nav aria-label="Principale">
+          <ul>
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={path.startsWith(item.href) ? "page" : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <button class="theme" type="button" aria-label="Cambia tema chiaro/scuro" title="Tema chiaro/scuro">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z" fill="currentColor"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="main" class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          <Icon name="banana" size={22} />{" "}
+          {`Dati aggiornati al concorso del ${date(summary.last_draw.date)} · ${int(summary.draws)} estrazioni dal ${date(summary.first_date)}. `}
+          Fonte: <a href="https://www.superenalotto.it/archivio-estrazioni" rel="noopener">archivio ufficiale</a>.
+        </p>
+        <p class="responsible">
+          <strong>Il gioco è vietato ai minori e può causare dipendenza patologica.</strong>{" "}
+          Questo sito non vende giocate e non ha legami con operatori di gioco. Se il gioco sta diventando un
+          problema: Telefono Verde Nazionale dell'Istituto Superiore di Sanità{" "}
+          <a href="tel:800558822">800 558822</a> (anonimo e gratuito).
+        </p>
+        <p class="muted">
+          Progetto indipendente e open source · <a href="https://github.com/federicodiluca/la-scimmia-vince"
+            >codice e dati su GitHub</a
+          > · SuperEnalotto è un marchio registrato dei rispettivi titolari.
+        </p>
+      </div>
+    </footer>
+
+    <div class="viz-tip" role="status" aria-live="polite"></div>
+
+    <script>
+      // cambio tema, ricordato solo in questo browser
+      const btn = document.querySelector<HTMLButtonElement>(".theme");
+      btn?.addEventListener("click", () => {
+        const root = document.documentElement;
+        const dark =
+          root.dataset.theme === "dark" ||
+          (!root.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+        root.dataset.theme = dark ? "light" : "dark";
+        try {
+          localStorage.setItem("theme", root.dataset.theme);
+        } catch {}
+      });
+
+      // tooltip dei grafici: qualsiasi elemento con data-tip, al passaggio o al focus
+      const tip = document.querySelector<HTMLDivElement>(".viz-tip")!;
+      const show = (el: Element, x: number, y: number) => {
+        tip.textContent = el.getAttribute("data-tip");
+        const w = tip.offsetWidth;
+        tip.style.left = `${Math.min(Math.max(8, x - w / 2), innerWidth - w - 8)}px`;
+        tip.style.top = `${Math.max(8, y - tip.offsetHeight - 12)}px`;
+        tip.classList.add("on");
+      };
+      const hide = () => tip.classList.remove("on");
+      document.addEventListener("pointerover", (e) => {
+        const el = (e.target as Element).closest("[data-tip]");
+        if (el) show(el, e.clientX, e.clientY);
+      });
+      document.addEventListener("pointermove", (e) => {
+        const el = (e.target as Element).closest("[data-tip]");
+        if (el) show(el, e.clientX, e.clientY);
+        else hide();
+      });
+      document.addEventListener("focusin", (e) => {
+        const el = (e.target as Element).closest("[data-tip]");
+        if (!el) return hide();
+        const r = el.getBoundingClientRect();
+        show(el, r.left + r.width / 2, r.top);
+      });
+      document.addEventListener("focusout", hide);
+      document.addEventListener("scroll", hide, { passive: true });
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: -999px;
+  }
+  .skip:focus {
+    left: 16px;
+    top: 8px;
+    z-index: 10;
+    background: var(--surface);
+    padding: 8px 12px;
+  }
+  .site-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+  .logo strong {
+    font-weight: 850;
+  }
+  nav {
+    margin-left: auto;
+  }
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-weight: 550;
+  }
+  nav a:hover,
+  nav a[aria-current="page"] {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--banana);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
+  }
+  .theme {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--ink-2);
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  @media (max-width: 720px) {
+    nav {
+      order: 3;
+      margin-left: 0;
+      width: 100%;
+      padding-bottom: 10px;
+    }
+    .theme {
+      margin-left: auto;
+    }
+  }
+  .site-footer {
+    margin-top: 64px;
+    padding: 28px 0 40px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 0.92rem;
+    color: var(--ink-2);
+  }
+  .responsible {
+    max-width: 80ch;
+  }
+</style>

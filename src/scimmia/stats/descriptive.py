@@ -22,6 +22,19 @@ def hit_matrix(draws: pd.DataFrame) -> np.ndarray:
     return hits
 
 
+def delays_before(hits: np.ndarray) -> np.ndarray:
+    """Ritardo di ogni numero *prima* di ciascuna estrazione (estrazioni × 90).
+
+    All'inizio dell'archivio il ritardo parte da 0: i primi valori sono sottostimati.
+    """
+    delay = np.zeros(hits.shape[1], dtype=int)
+    out = np.empty_like(hits, dtype=int)
+    for i, row in enumerate(hits):
+        out[i] = delay
+        delay = np.where(row, 0, delay + 1)
+    return out
+
+
 def long_numbers(draws: pd.DataFrame) -> pd.DataFrame:
     """Una riga per numero estratto: id, date, number."""
     return (
@@ -52,11 +65,18 @@ def group_key(draws: pd.DataFrame, by: str) -> pd.Series:
             raise ValueError(f"raggruppamento sconosciuto: {by}")
 
 
-def frequency_by(draws: pd.DataFrame, by: str) -> pd.DataFrame:
-    """Tabella numero × gruppo (anno, mese, giorno della settimana, settimana ISO)."""
-    groups = pd.DataFrame({"id": draws["id"], by: group_key(draws, by)})
+def frequency_by(draws: pd.DataFrame, by: str | pd.Series) -> pd.DataFrame:
+    """Tabella numero × gruppo.
+
+    `by` è un raggruppamento sul calendario ("year", "month", "weekday", "isoweek") oppure una
+    Series con un'etichetta per estrazione, allineata a `draws` (es. il meteo di quel giorno);
+    le estrazioni con etichetta mancante vengono escluse.
+    """
+    key = group_key(draws, by) if isinstance(by, str) else by
+    name = key.name or "group"
+    groups = pd.DataFrame({"id": draws["id"], name: key.to_numpy()}).dropna(subset=[name])
     long = long_numbers(draws).merge(groups, on="id")
-    return pd.crosstab(long["number"], long[by]).reindex(ALL_NUMBERS, fill_value=0)
+    return pd.crosstab(long["number"], long[name]).reindex(ALL_NUMBERS, fill_value=0)
 
 
 def delays(draws: pd.DataFrame) -> pd.DataFrame:

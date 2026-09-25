@@ -1,0 +1,194 @@
+---
+// Scarto di ogni numero dal numero di uscite atteso, con la fascia che il puro caso
+// produce nel 95% dei casi. Colore solo per chi ne esce: dentro la fascia è rumore.
+import type { Band } from "../lib/data";
+import { dec, Il, int, url } from "../lib/format";
+import { columnPath, niceStep } from "../lib/svg";
+
+interface Props {
+  counts: Record<string, number>;
+  band: Band;
+  highlight?: number;
+}
+const { counts, band, highlight } = Astro.props;
+
+const W = 900;
+const H = 320;
+const m = { l: 44, r: 8, t: 14, b: 34 };
+const pw = W - m.l - m.r;
+const ph = H - m.t - m.b;
+
+const rows = Object.entries(counts).map(([n, c]) => ({ n: Number(n), c, dev: c - band.expected }));
+const maxAbs = Math.max(...rows.map((r) => Math.abs(r.dev)), band.high - band.expected, band.expected - band.low);
+const step = niceStep(maxAbs * 2, 6);
+const lim = Math.ceil(maxAbs / step) * step;
+const y = (v: number) => m.t + ph / 2 - (v / lim) * (ph / 2);
+const slot = pw / rows.length;
+const bw = Math.min(24, slot - 2);
+const ticks: number[] = [];
+for (let v = -lim; v <= lim + 1e-9; v += step) ticks.push(Math.round(v));
+
+const kind = (c: number) => (c > band.high ? "hot" : c < band.low ? "cold" : "normal");
+const sign = (v: number) => (v > 0 ? `+${dec(v, 0)}` : dec(v, 0));
+---
+
+<figure class="viz">
+  <div class="legend" aria-hidden="true">
+    <span><i class="sw band"></i>fascia del caso ({Math.round(band.confidence * 100)}%)</span>
+    <span><i class="sw normal"></i>dentro la fascia</span>
+    <span><i class="sw hot"></i>sopra la fascia</span>
+    <span><i class="sw cold"></i>sotto la fascia</span>
+  </div>
+  <div class="chart-scroll"><svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="freq-title freq-desc">
+    <title id="freq-title">Scarto dalle uscite attese per ciascun numero da 1 a 90</title>
+    <desc id="freq-desc">
+      {band.outside} numeri su 90 escono dalla fascia del caso; ce ne si aspetta circa {dec(90 * (1 - band.confidence), 1)}.
+    </desc>
+    <rect
+      class="band"
+      x={m.l}
+      width={pw}
+      y={y(band.high - band.expected)}
+      height={y(band.low - band.expected) - y(band.high - band.expected)}
+    ></rect>
+    {
+      ticks.map((t) => (
+        <g>
+          <line class={t === 0 ? "zero" : "grid"} x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} />
+          <text class="tick" x={m.l - 6} y={y(t)} dy="0.32em" text-anchor="end">
+            {t === 0 ? "atteso" : sign(t)}
+          </text>
+        </g>
+      ))
+    }
+    {
+      rows.map((r, i) => {
+        const x = m.l + i * slot + (slot - bw) / 2;
+        return (
+          <a
+            href={url(`numeri/${r.n}`)}
+            data-tip={`${Il(r.n)}: uscito ${int(r.c)} volte, attese ${dec(band.expected, 0)} (${sign(r.dev)})`}
+            aria-label={`Numero ${r.n}: ${int(r.c)} uscite, ${sign(r.dev)} rispetto all'atteso`}
+          >
+            <rect class="hit" x={m.l + i * slot} width={slot} y={m.t} height={ph} />
+            <path
+              class:list={["bar", kind(r.c), { focus: r.n === highlight }]}
+              d={columnPath(x, bw, y(0), y(r.dev))}
+            />
+          </a>
+        );
+      })
+    }
+    {
+      [1, 10, 20, 30, 40, 50, 60, 70, 80, 90].map((n) => (
+        <text class="tick" x={m.l + (n - 0.5) * slot} y={H - 12} text-anchor="middle">
+          {n}
+        </text>
+      ))
+    }
+  </svg></div>
+  <details class="data-table">
+    <summary>Mostra i dati in tabella</summary>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Numero</th><th class="num">Uscite</th><th class="num">Scarto dall'atteso</th><th>Rispetto alla fascia</th></tr>
+        </thead>
+        <tbody>
+          {
+            rows.map((r) => (
+              <tr>
+                <td><a href={url(`numeri/${r.n}`)}>{r.n}</a></td>
+                <td class="num">{int(r.c)}</td>
+                <td class="num">{sign(r.dev)}</td>
+                <td>{{ hot: "sopra", cold: "sotto", normal: "dentro" }[kind(r.c)]}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>
+
+<style>
+  .viz {
+    margin: 0;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .band {
+    fill: var(--band);
+  }
+  .grid {
+    stroke: var(--grid);
+    stroke-width: 1;
+  }
+  .zero {
+    stroke: var(--axis);
+    stroke-width: 1;
+  }
+  .tick {
+    fill: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .hit {
+    fill: transparent;
+  }
+  .bar.normal {
+    fill: var(--series-muted);
+  }
+  .bar.hot {
+    fill: var(--series-1);
+  }
+  .bar.cold {
+    fill: var(--neg);
+  }
+  .bar.focus {
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+  a:hover .bar,
+  a:focus-visible .bar {
+    opacity: 0.75;
+  }
+  a:focus-visible {
+    outline: none;
+  }
+  a:focus-visible .hit {
+    fill: var(--band);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+  }
+  .sw {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+  .sw.band {
+    background: var(--band);
+    box-shadow: inset 0 0 0 1px var(--axis);
+  }
+  .sw.normal {
+    background: var(--series-muted);
+  }
+  .sw.hot {
+    background: var(--series-1);
+  }
+  .sw.cold {
+    background: var(--neg);
+  }
+</style>

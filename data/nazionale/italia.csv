@@ -1,0 +1,361 @@
+date,opponent,goals_for,goals_against,tournament,home
+1997-01-22,Northern Ireland,2,0,Friendly,True
+1997-02-12,England,1,0,FIFA World Cup qualification,False
+1997-03-29,Moldova,3,0,FIFA World Cup qualification,True
+1997-04-02,Poland,0,0,FIFA World Cup qualification,False
+1997-04-30,Poland,3,0,FIFA World Cup qualification,True
+1997-06-04,England,0,2,Tournoi de France,False
+1997-06-08,Brazil,3,3,Tournoi de France,False
+1997-06-11,France,2,2,Tournoi de France,False
+1997-09-10,Georgia,0,0,FIFA World Cup qualification,False
+1997-10-11,England,0,0,FIFA World Cup qualification,True
+1997-10-29,Russia,1,1,FIFA World Cup qualification,False
+1997-11-15,Russia,1,0,FIFA World Cup qualification,True
+1998-01-28,Slovakia,3,0,Friendly,True
+1998-04-22,Paraguay,3,1,Friendly,True
+1998-06-02,Sweden,0,1,Friendly,False
+1998-06-11,Chile,2,2,FIFA World Cup,False
+1998-06-17,Cameroon,3,0,FIFA World Cup,False
+1998-06-23,Austria,2,1,FIFA World Cup,False
+1998-06-27,Norway,1,0,FIFA World Cup,False
+1998-07-03,France,0,0,FIFA World Cup,False
+1998-09-05,Wales,2,0,UEFA Euro qualification,False
+1998-10-10,Switzerland,2,0,UEFA Euro qualification,True
+1998-11-18,Spain,2,2,Friendly,True
+1999-02-10,Norway,0,0,Friendly,True
+1999-03-27,Denmark,2,1,UEFA Euro qualification,False
+1999-03-31,Belarus,1,1,UEFA Euro qualification,True
+1999-04-28,Croatia,0,0,Friendly,False
+1999-06-05,Wales,4,0,UEFA Euro qualification,True
+1999-06-09,Switzerland,0,0,UEFA Euro qualification,False
+1999-09-08,Denmark,2,3,UEFA Euro qualification,True
+1999-10-09,Belarus,0,0,UEFA Euro qualification,False
+1999-11-13,Belgium,1,3,Friendly,True
+2000-02-23,Sweden,1,0,Friendly,True
+2000-03-29,Spain,0,2,Friendly,False
+2000-04-26,Portugal,2,0,Friendly,True
+2000-06-03,Norway,0,1,Friendly,False
+2000-06-11,Turkey,2,1,UEFA Euro,False
+2000-06-14,Belgium,2,0,UEFA Euro,False
+2000-06-19,Sweden,2,1,UEFA Euro,False
+2000-06-24,Romania,2,0,UEFA Euro,False
+2000-06-29,Netherlands,0,0,UEFA Euro,False
+2000-07-02,France,1,2,UEFA Euro,False
+2000-09-03,Hungary,2,2,FIFA World Cup qualification,False
+2000-10-07,Romania,3,0,FIFA World Cup qualification,True
+2000-10-11,Georgia,2,0,FIFA World Cup qualification,True
+2000-11-15,England,1,0,Friendly,True
+2001-02-28,Argentina,1,2,Friendly,True
+2001-03-24,Romania,2,0,FIFA World Cup qualification,False
+2001-03-28,Lithuania,4,0,FIFA World Cup qualification,True
+2001-04-25,South Africa,1,0,Friendly,True
+2001-06-02,Georgia,2,1,FIFA World Cup qualification,False
+2001-09-01,Lithuania,0,0,FIFA World Cup qualification,False
+2001-09-05,Morocco,1,0,Friendly,True
+2001-10-06,Hungary,1,0,FIFA World Cup qualification,True
+2001-11-07,Japan,1,1,Friendly,False
+2002-02-13,United States,1,0,Friendly,True
+2002-03-27,England,2,1,Friendly,False
+2002-04-17,Uruguay,1,1,Friendly,True
+2002-05-18,Czech Republic,0,1,Friendly,False
+2002-06-03,Ecuador,2,0,FIFA World Cup,False
+2002-06-08,Croatia,1,2,FIFA World Cup,False
+2002-06-13,Mexico,1,1,FIFA World Cup,False
+2002-06-18,South Korea,1,2,FIFA World Cup,False
+2002-08-21,Slovenia,0,1,Friendly,True
+2002-09-07,Azerbaijan,2,0,UEFA Euro qualification,False
+2002-10-12,Serbia,1,1,UEFA Euro qualification,True
+2002-10-16,Wales,1,2,UEFA Euro qualification,False
+2002-11-20,Turkey,1,1,Friendly,True
+2003-02-12,Portugal,1,0,Friendly,True
+2003-03-29,Finland,2,0,UEFA Euro qualification,True
+2003-04-30,Switzerland,2,1,Friendly,False
+2003-06-03,Northern Ireland,2,0,Friendly,True
+2003-06-11,Finland,2,0,UEFA Euro qualification,False
+2003-08-20,Germany,1,0,Friendly,False
+2003-09-06,Wales,4,0,UEFA Euro qualification,True
+2003-09-10,Serbia,1,1,UEFA Euro qualification,False
+2003-10-11,Azerbaijan,4,0,UEFA Euro qualification,True
+2003-11-12,Poland,1,3,Friendly,False
+2003-11-16,Romania,1,0,Friendly,True
+2004-02-18,Czech Republic,2,2,Friendly,True
+2004-03-31,Portugal,2,1,Friendly,False
+2004-04-28,Spain,1,1,Friendly,True
+2004-05-30,Tunisia,4,0,Friendly,False
+2004-06-14,Denmark,0,0,UEFA Euro,False
+2004-06-18,Sweden,1,1,UEFA Euro,False
+2004-06-22,Bulgaria,2,1,UEFA Euro,False
+2004-08-18,Iceland,0,2,Friendly,False
+2004-09-04,Norway,2,1,FIFA World Cup qualification,True
+2004-09-08,Moldova,1,0,FIFA World Cup qualification,False
+2004-10-09,Slovenia,0,1,FIFA World Cup qualification,False
+2004-10-13,Belarus,4,3,FIFA World Cup qualification,True
+2004-11-17,Finland,1,0,Friendly,True
+2005-02-09,Russia,2,0,Friendly,True
+2005-03-26,Scotland,2,0,FIFA World Cup qualification,True
+2005-03-30,Iceland,0,0,Friendly,True
+2005-06-04,Norway,0,0,FIFA World Cup qualification,False
+2005-06-08,Serbia,1,1,Friendly,False
+2005-06-11,Ecuador,1,1,Friendly,False
+2005-08-17,Republic of Ireland,2,1,Friendly,False
+2005-09-03,Scotland,1,1,FIFA World Cup qualification,False
+2005-09-07,Belarus,4,1,FIFA World Cup qualification,False
+2005-10-08,Slovenia,1,0,FIFA World Cup qualification,True
+2005-10-12,Moldova,2,1,FIFA World Cup qualification,True
+2005-11-12,Netherlands,3,1,Friendly,False
+2005-11-16,Ivory Coast,1,1,Friendly,False
+2006-03-01,Germany,4,1,Friendly,True
+2006-05-31,Switzerland,1,1,Friendly,False
+2006-06-02,Ukraine,0,0,Friendly,False
+2006-06-12,Ghana,2,0,FIFA World Cup,False
+2006-06-17,United States,1,1,FIFA World Cup,False
+2006-06-22,Czech Republic,2,0,FIFA World Cup,False
+2006-06-26,Australia,1,0,FIFA World Cup,False
+2006-06-30,Ukraine,3,0,FIFA World Cup,False
+2006-07-04,Germany,2,0,FIFA World Cup,False
+2006-07-09,France,1,1,FIFA World Cup,False
+2006-08-16,Croatia,0,2,Friendly,True
+2006-09-02,Lithuania,1,1,UEFA Euro qualification,True
+2006-09-06,France,1,3,UEFA Euro qualification,False
+2006-10-07,Ukraine,2,0,UEFA Euro qualification,True
+2006-10-11,Georgia,3,1,UEFA Euro qualification,False
+2006-11-15,Turkey,1,1,Friendly,True
+2007-03-28,Scotland,2,0,UEFA Euro qualification,True
+2007-06-02,Faroe Islands,2,1,UEFA Euro qualification,False
+2007-06-06,Lithuania,2,0,UEFA Euro qualification,False
+2007-08-22,Hungary,1,3,Friendly,False
+2007-09-08,France,0,0,UEFA Euro qualification,True
+2007-09-12,Ukraine,2,1,UEFA Euro qualification,False
+2007-10-13,Georgia,2,0,UEFA Euro qualification,True
+2007-10-17,South Africa,2,0,Friendly,True
+2007-11-17,Scotland,2,1,UEFA Euro qualification,False
+2007-11-21,Faroe Islands,3,1,UEFA Euro qualification,True
+2008-02-06,Portugal,3,1,Friendly,False
+2008-03-26,Spain,0,1,Friendly,False
+2008-05-30,Belgium,3,1,Friendly,True
+2008-06-09,Netherlands,0,3,UEFA Euro,False
+2008-06-13,Romania,1,1,UEFA Euro,False
+2008-06-17,France,2,0,UEFA Euro,False
+2008-06-22,Spain,0,0,UEFA Euro,False
+2008-08-20,Austria,2,2,Friendly,False
+2008-09-06,Cyprus,2,1,FIFA World Cup qualification,False
+2008-09-10,Georgia,2,0,FIFA World Cup qualification,True
+2008-10-11,Bulgaria,0,0,FIFA World Cup qualification,False
+2008-10-15,Montenegro,2,1,FIFA World Cup qualification,True
+2008-11-19,Greece,1,1,Friendly,False
+2009-02-10,Brazil,0,2,Friendly,False
+2009-03-28,Montenegro,2,0,FIFA World Cup qualification,False
+2009-04-01,Republic of Ireland,1,1,FIFA World Cup qualification,True
+2009-06-06,Northern Ireland,3,0,Friendly,True
+2009-06-10,New Zealand,4,3,Friendly,False
+2009-06-15,United States,3,1,Confederations Cup,False
+2009-06-18,Egypt,0,1,Confederations Cup,False
+2009-06-21,Brazil,0,3,Confederations Cup,False
+2009-08-12,Switzerland,0,0,Friendly,False
+2009-09-05,Georgia,2,0,FIFA World Cup qualification,False
+2009-09-09,Bulgaria,2,0,FIFA World Cup qualification,True
+2009-10-10,Republic of Ireland,2,2,FIFA World Cup qualification,False
+2009-10-14,Cyprus,3,2,FIFA World Cup qualification,True
+2009-11-14,Netherlands,0,0,Friendly,True
+2009-11-18,Sweden,1,0,Friendly,True
+2010-03-03,Cameroon,0,0,Friendly,False
+2010-06-03,Mexico,1,2,Friendly,False
+2010-06-05,Switzerland,1,1,Friendly,False
+2010-06-14,Paraguay,1,1,FIFA World Cup,False
+2010-06-20,New Zealand,1,1,FIFA World Cup,False
+2010-06-24,Slovakia,2,3,FIFA World Cup,False
+2010-08-10,Ivory Coast,0,1,Friendly,False
+2010-09-03,Estonia,2,1,UEFA Euro qualification,False
+2010-09-07,Faroe Islands,5,0,UEFA Euro qualification,True
+2010-10-08,Northern Ireland,0,0,UEFA Euro qualification,False
+2010-10-12,Serbia,3,0,UEFA Euro qualification,True
+2010-11-17,Romania,1,1,Friendly,False
+2011-02-09,Germany,1,1,Friendly,False
+2011-03-25,Slovenia,1,0,UEFA Euro qualification,False
+2011-03-29,Ukraine,2,0,Friendly,False
+2011-06-03,Estonia,3,0,UEFA Euro qualification,True
+2011-06-07,Republic of Ireland,0,2,Friendly,False
+2011-08-10,Spain,2,1,Friendly,True
+2011-09-02,Faroe Islands,1,0,UEFA Euro qualification,False
+2011-09-06,Slovenia,1,0,UEFA Euro qualification,True
+2011-10-07,Serbia,1,1,UEFA Euro qualification,False
+2011-10-11,Northern Ireland,3,0,UEFA Euro qualification,True
+2011-11-11,Poland,2,0,Friendly,False
+2011-11-15,Uruguay,0,1,Friendly,True
+2012-02-29,United States,0,1,Friendly,True
+2012-06-01,Russia,0,3,Friendly,False
+2012-06-10,Spain,1,1,UEFA Euro,False
+2012-06-14,Croatia,1,1,UEFA Euro,False
+2012-06-18,Republic of Ireland,2,0,UEFA Euro,False
+2012-06-24,England,0,0,UEFA Euro,False
+2012-06-28,Germany,2,1,UEFA Euro,False
+2012-07-01,Spain,0,4,UEFA Euro,False
+2012-08-15,England,1,2,Friendly,False
+2012-09-07,Bulgaria,2,2,FIFA World Cup qualification,False
+2012-09-11,Malta,2,0,FIFA World Cup qualification,True
+2012-10-12,Armenia,3,1,FIFA World Cup qualification,False
+2012-10-16,Denmark,3,1,FIFA World Cup qualification,True
+2012-11-14,France,1,2,Friendly,True
+2013-02-06,Netherlands,1,1,Friendly,False
+2013-03-21,Brazil,2,2,Friendly,False
+2013-03-26,Malta,2,0,FIFA World Cup qualification,False
+2013-05-31,San Marino,4,0,Friendly,True
+2013-06-07,Czech Republic,0,0,FIFA World Cup qualification,False
+2013-06-11,Haiti,2,2,Friendly,False
+2013-06-16,Mexico,2,1,Confederations Cup,False
+2013-06-19,Japan,4,3,Confederations Cup,False
+2013-06-22,Brazil,2,4,Confederations Cup,False
+2013-06-27,Spain,0,0,Confederations Cup,False
+2013-06-30,Uruguay,2,2,Confederations Cup,False
+2013-08-14,Argentina,1,2,Friendly,True
+2013-09-06,Bulgaria,1,0,FIFA World Cup qualification,True
+2013-09-10,Czech Republic,2,1,FIFA World Cup qualification,True
+2013-10-11,Denmark,2,2,FIFA World Cup qualification,False
+2013-10-15,Armenia,2,2,FIFA World Cup qualification,True
+2013-11-15,Germany,1,1,Friendly,True
+2013-11-18,Nigeria,2,2,Friendly,False
+2014-03-05,Spain,0,1,Friendly,False
+2014-05-31,Republic of Ireland,0,0,Friendly,False
+2014-06-04,Luxembourg,1,1,Friendly,True
+2014-06-14,England,2,1,FIFA World Cup,False
+2014-06-20,Costa Rica,0,1,FIFA World Cup,False
+2014-06-24,Uruguay,0,1,FIFA World Cup,False
+2014-09-04,Netherlands,2,0,Friendly,True
+2014-09-09,Norway,2,0,UEFA Euro qualification,False
+2014-10-10,Azerbaijan,2,1,UEFA Euro qualification,True
+2014-10-13,Malta,1,0,UEFA Euro qualification,False
+2014-11-16,Croatia,1,1,UEFA Euro qualification,True
+2014-11-18,Albania,1,0,Friendly,True
+2015-03-28,Bulgaria,2,2,UEFA Euro qualification,False
+2015-03-31,England,1,1,Friendly,True
+2015-06-12,Croatia,1,1,UEFA Euro qualification,False
+2015-06-16,Portugal,0,1,Friendly,False
+2015-09-03,Malta,1,0,UEFA Euro qualification,True
+2015-09-06,Bulgaria,1,0,UEFA Euro qualification,True
+2015-10-10,Azerbaijan,3,1,UEFA Euro qualification,False
+2015-10-13,Norway,2,1,UEFA Euro qualification,True
+2015-11-13,Belgium,1,3,Friendly,False
+2015-11-17,Romania,2,2,Friendly,True
+2016-03-24,Spain,1,1,Friendly,True
+2016-03-29,Germany,1,4,Friendly,False
+2016-05-29,Scotland,1,0,Friendly,False
+2016-06-06,Finland,2,0,Friendly,True
+2016-06-13,Belgium,2,0,UEFA Euro,False
+2016-06-17,Sweden,1,0,UEFA Euro,False
+2016-06-22,Republic of Ireland,0,1,UEFA Euro,False
+2016-06-27,Spain,2,0,UEFA Euro,False
+2016-07-02,Germany,1,1,UEFA Euro,False
+2016-09-01,France,1,3,Friendly,True
+2016-09-05,Israel,3,1,FIFA World Cup qualification,False
+2016-10-06,Spain,1,1,FIFA World Cup qualification,True
+2016-10-09,North Macedonia,3,2,FIFA World Cup qualification,False
+2016-11-12,Liechtenstein,4,0,FIFA World Cup qualification,False
+2016-11-15,Germany,0,0,Friendly,True
+2017-03-24,Albania,2,0,FIFA World Cup qualification,True
+2017-03-28,Netherlands,2,1,Friendly,False
+2017-05-31,San Marino,8,0,Friendly,True
+2017-06-07,Uruguay,3,0,Friendly,False
+2017-06-11,Liechtenstein,5,0,FIFA World Cup qualification,True
+2017-09-02,Spain,0,3,FIFA World Cup qualification,False
+2017-09-05,Israel,1,0,FIFA World Cup qualification,True
+2017-10-06,North Macedonia,1,1,FIFA World Cup qualification,True
+2017-10-09,Albania,1,0,FIFA World Cup qualification,False
+2017-11-10,Sweden,0,1,FIFA World Cup qualification,False
+2017-11-13,Sweden,0,0,FIFA World Cup qualification,True
+2018-03-23,Argentina,0,2,Friendly,False
+2018-03-27,England,1,1,Friendly,False
+2018-05-28,Saudi Arabia,2,1,Friendly,False
+2018-06-01,France,1,3,Friendly,False
+2018-06-04,Netherlands,1,1,Friendly,True
+2018-09-07,Poland,1,1,UEFA Nations League,True
+2018-09-10,Portugal,0,1,UEFA Nations League,False
+2018-10-10,Ukraine,1,1,Friendly,True
+2018-10-14,Poland,1,0,UEFA Nations League,False
+2018-11-17,Portugal,0,0,UEFA Nations League,True
+2018-11-20,United States,1,0,Friendly,False
+2019-03-23,Finland,2,0,UEFA Euro qualification,True
+2019-03-26,Liechtenstein,6,0,UEFA Euro qualification,True
+2019-06-08,Greece,3,0,UEFA Euro qualification,False
+2019-06-11,Bosnia and Herzegovina,2,1,UEFA Euro qualification,True
+2019-09-05,Armenia,3,1,UEFA Euro qualification,False
+2019-09-08,Finland,2,1,UEFA Euro qualification,False
+2019-10-12,Greece,2,0,UEFA Euro qualification,True
+2019-10-15,Liechtenstein,5,0,UEFA Euro qualification,False
+2019-11-15,Bosnia and Herzegovina,3,0,UEFA Euro qualification,False
+2019-11-18,Armenia,9,1,UEFA Euro qualification,True
+2020-09-04,Bosnia and Herzegovina,1,1,UEFA Nations League,True
+2020-09-07,Netherlands,1,0,UEFA Nations League,False
+2020-10-07,Moldova,6,0,Friendly,True
+2020-10-11,Poland,0,0,UEFA Nations League,False
+2020-10-14,Netherlands,1,1,UEFA Nations League,True
+2020-11-11,Estonia,4,0,Friendly,True
+2020-11-15,Poland,2,0,UEFA Nations League,True
+2020-11-18,Bosnia and Herzegovina,2,0,UEFA Nations League,False
+2021-03-25,Northern Ireland,2,0,FIFA World Cup qualification,True
+2021-03-28,Bulgaria,2,0,FIFA World Cup qualification,False
+2021-03-31,Lithuania,2,0,FIFA World Cup qualification,False
+2021-05-28,San Marino,7,0,Friendly,True
+2021-06-04,Czech Republic,4,0,Friendly,True
+2021-06-11,Turkey,3,0,UEFA Euro,True
+2021-06-16,Switzerland,3,0,UEFA Euro,True
+2021-06-20,Wales,1,0,UEFA Euro,True
+2021-06-26,Austria,2,1,UEFA Euro,False
+2021-07-02,Belgium,2,1,UEFA Euro,False
+2021-07-06,Spain,1,1,UEFA Euro,False
+2021-07-11,England,1,1,UEFA Euro,False
+2021-09-02,Bulgaria,1,1,FIFA World Cup qualification,True
+2021-09-05,Switzerland,0,0,FIFA World Cup qualification,False
+2021-09-08,Lithuania,5,0,FIFA World Cup qualification,True
+2021-10-06,Spain,1,2,UEFA Nations League,True
+2021-10-10,Belgium,2,1,UEFA Nations League,True
+2021-11-12,Switzerland,1,1,FIFA World Cup qualification,True
+2021-11-15,Northern Ireland,0,0,FIFA World Cup qualification,False
+2022-03-24,North Macedonia,0,1,FIFA World Cup qualification,True
+2022-03-29,Turkey,3,2,Friendly,False
+2022-06-01,Argentina,0,3,CONMEBOL–UEFA Cup of Champions,False
+2022-06-04,Germany,1,1,UEFA Nations League,True
+2022-06-07,Hungary,2,1,UEFA Nations League,True
+2022-06-11,England,0,0,UEFA Nations League,False
+2022-06-14,Germany,2,5,UEFA Nations League,False
+2022-09-23,England,1,0,UEFA Nations League,True
+2022-09-26,Hungary,2,0,UEFA Nations League,False
+2022-11-16,Albania,3,1,Friendly,False
+2022-11-20,Austria,0,2,Friendly,False
+2023-03-23,England,1,2,UEFA Euro qualification,True
+2023-03-26,Malta,2,0,UEFA Euro qualification,False
+2023-06-15,Spain,1,2,UEFA Nations League,False
+2023-06-18,Netherlands,3,2,UEFA Nations League,False
+2023-09-09,North Macedonia,1,1,UEFA Euro qualification,False
+2023-09-12,Ukraine,2,1,UEFA Euro qualification,True
+2023-10-14,Malta,4,0,UEFA Euro qualification,True
+2023-10-17,England,1,3,UEFA Euro qualification,False
+2023-11-17,North Macedonia,5,2,UEFA Euro qualification,True
+2023-11-20,Ukraine,0,0,UEFA Euro qualification,False
+2024-03-21,Venezuela,2,1,Friendly,False
+2024-03-24,Ecuador,2,0,Friendly,False
+2024-06-04,Turkey,0,0,Friendly,True
+2024-06-09,Bosnia and Herzegovina,1,0,Friendly,True
+2024-06-15,Albania,2,1,UEFA Euro,False
+2024-06-20,Spain,0,1,UEFA Euro,False
+2024-06-24,Croatia,1,1,UEFA Euro,False
+2024-06-29,Switzerland,0,2,UEFA Euro,False
+2024-09-06,France,3,1,UEFA Nations League,False
+2024-09-09,Israel,2,1,UEFA Nations League,False
+2024-10-10,Belgium,2,2,UEFA Nations League,True
+2024-10-14,Israel,4,1,UEFA Nations League,True
+2024-11-14,Belgium,1,0,UEFA Nations League,False
+2024-11-17,France,1,3,UEFA Nations League,True
+2025-03-20,Germany,1,2,UEFA Nations League,True
+2025-03-23,Germany,3,3,UEFA Nations League,False
+2025-06-06,Norway,0,3,FIFA World Cup qualification,False
+2025-06-09,Moldova,2,0,FIFA World Cup qualification,True
+2025-09-05,Estonia,5,0,FIFA World Cup qualification,True
+2025-09-08,Israel,5,4,FIFA World Cup qualification,False
+2025-10-11,Estonia,3,1,FIFA World Cup qualification,False
+2025-10-14,Israel,3,0,FIFA World Cup qualification,True
+2025-11-13,Moldova,2,0,FIFA World Cup qualification,False
+2025-11-16,Norway,1,4,FIFA World Cup qualification,True
+2026-03-26,Northern Ireland,2,0,FIFA World Cup qualification,True
+2026-03-31,Bosnia and Herzegovina,1,1,FIFA World Cup qualification,False
+2026-06-03,Luxembourg,1,0,Friendly,False
+2026-06-07,Greece,1,0,Friendly,False

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.astro/
+# generati da `scimmia stats` e `npm run icons`
+src/data/generated/
+public/icons/

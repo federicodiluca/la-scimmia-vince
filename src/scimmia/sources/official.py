@@ -102,6 +102,8 @@ def parse_detail_page(html: str, draw_id: str) -> DrawDetail:
         if not (left and middle and right):
             continue
         category = " ".join(left.get_text().split())
+        if not category:  # alcune pagine (2017-2018) hanno una riga vuota tra le vincite immediate
+            continue
         tiers.append(
             PrizeTier(
                 game=_game_for(category),

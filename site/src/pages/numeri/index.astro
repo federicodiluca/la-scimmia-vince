@@ -1,0 +1,138 @@
+---
+import Verdict from "../../components/Verdict.astro";
+import Layout from "../../layouts/Layout.astro";
+import { frequency, numbers, summary } from "../../lib/data";
+import { dec, int, url } from "../../lib/format";
+
+const band = frequency.band;
+const byDelay = [...numbers].sort((a, b) => b.delay.current - a.delay.current).slice(0, 5);
+const byCount = [...numbers].sort((a, b) => b.count - a.count);
+---
+
+<Layout
+  title="I 90 numeri del SuperEnalotto: frequenze e ritardi"
+  description={`Quante volte è uscito ogni numero del SuperEnalotto in ${int(summary.draws)} estrazioni, ritardi attuali e record, confrontati con quello che produce il puro caso.`}
+>
+  <h1>I 90 numeri</h1>
+  <p class="lead">
+    Per ogni numero: quante volte è uscito, da quanto non esce e con chi esce più spesso. E soprattutto quanto ci si
+    aspettava per caso, cioè circa {dec(band.expected, 0)} uscite in {int(summary.draws)} estrazioni.
+  </p>
+
+  <ol class="board" aria-label="Numeri da 1 a 90">
+    {
+      numbers.map((n) => {
+        const dev = n.count - band.expected;
+        const kind = n.count > band.high ? "hot" : n.count < band.low ? "cold" : "normal";
+        return (
+          <li>
+            <a href={url(`numeri/${n.number}`)} class:list={["cell", kind]}>
+              <span class="n">{n.number}</span>
+              <span class="c tabular">
+                {int(n.count)} <small>({dev > 0 ? "+" : ""}{dec(dev, 0)})</small>
+              </span>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ol>
+  <p class="muted legend">
+    Tra parentesi lo scarto dall'atteso. Bordo blu: sopra la fascia del caso. Bordo rosso: sotto. Tutti gli altri
+    sono nella norma.
+  </p>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <h2>I più usciti</h2>
+      <ol class="rank">
+        {byCount.slice(0, 5).map((n) => <li><a href={url(`numeri/${n.number}`)}>{n.number}</a> <span class="tabular">{int(n.count)} volte</span></li>)}
+      </ol>
+    </div>
+    <div class="card">
+      <h2>I meno usciti</h2>
+      <ol class="rank">
+        {byCount.slice(-5).reverse().map((n) => <li><a href={url(`numeri/${n.number}`)}>{n.number}</a> <span class="tabular">{int(n.count)} volte</span></li>)}
+      </ol>
+    </div>
+    <div class="card">
+      <h2>I ritardatari di oggi</h2>
+      <ol class="rank">
+        {byDelay.map((n) => <li><a href={url(`numeri/${n.number}`)}>{n.number}</a> <span class="tabular">{int(n.delay.current)} estrazioni</span></li>)}
+      </ol>
+    </div>
+  </div>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong> queste classifiche cambiano ogni settimana e non predicono niente. Il più
+      uscito non è "caldo" e il ritardatario non è "maturo": ogni estrazione ha la stessa probabilità di sempre.
+      <a href={url("ritardatari")}>Qui la prova sui ritardatari.</a>
+    </p>
+  </Verdict>
+</Layout>
+
+<style>
+  .board {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 8px;
+  }
+  .cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .cell:hover {
+    background: var(--surface-2);
+  }
+  .cell.hot {
+    border-color: var(--series-1);
+  }
+  .cell.cold {
+    border-color: var(--neg);
+  }
+  .n {
+    font-size: 1.4rem;
+    font-weight: 750;
+  }
+  .c {
+    font-size: 0.85rem;
+    color: var(--ink-2);
+  }
+  .c small {
+    color: var(--muted);
+  }
+  .legend {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+  .rank {
+    margin: 0;
+    padding-left: 1.4em;
+  }
+  .rank li {
+    padding: 3px 0;
+  }
+  .rank a {
+    font-weight: 700;
+    display: inline-block;
+    min-width: 2ch;
+  }
+  .rank span {
+    color: var(--ink-2);
+  }
+  .card h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+  }
+</style>

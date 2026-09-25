@@ -70,3 +70,14 @@ def test_draw_validation():
 
 def test_months_between_crosses_year():
     assert list(months_between(date(2025, 11, 20), date(2026, 2, 1))) == [(2025, 11), (2025, 12), (2026, 1), (2026, 2)]
+
+
+def test_detail_page_skips_empty_tier_rows():
+    row = "superenalotto-extraction__table-details__item__content__table__body__row"
+    html = "".join(
+        f'<table><tr class="{row}"><td class="{row}__left">{left}</td>'
+        f'<td class="{row}__middle">{mid}</td><td class="{row}__right">{right}</td></tr></table>'
+        for left, mid, right in [("Punti 3", "10", "25,00 €"), ("", "0", "-")]
+    )
+    detail = parse_detail_page(html, "2017-001")
+    assert [t.category for t in detail.tiers] == ["Punti 3"]

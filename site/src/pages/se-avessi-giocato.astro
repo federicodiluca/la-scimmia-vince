@@ -1,0 +1,322 @@
+---
+import BalancePanel from "../components/BalancePanel.astro";
+import Icon from "../components/Icon.astro";
+import Verdict from "../components/Verdict.astro";
+import Layout from "../layouts/Layout.astro";
+import { simulation as sim } from "../lib/data";
+import { date, eur, int, pct } from "../lib/format";
+
+const c = sim.curves;
+const all = [...c.monkeys["5"], ...c.monkeys["95"], ...Object.values(c.strategies).flat()];
+const pad = (Math.max(...all) - Math.min(...all)) * 0.06;
+const domain: [number, number] = [Math.min(...all) - pad, Math.max(0, ...all) + pad];
+const band = { low: c.monkeys["5"], mid: c.monkeys["50"], high: c.monkeys["95"] };
+const medianReturn = sim.monkeys.returned["50"]!;
+const years = new Date(sim.last.date).getUTCFullYear() - new Date(sim.first.date).getUTCFullYear();
+const monkeyTable = JSON.stringify(sim.monkeys.final_sorted);
+// fuori dalla fascia 5°-95° percentile delle scimmie
+const outside = sim.strategies.filter((s) => s.monkeys_better < sim.players * 0.05 || s.monkeys_better > sim.players * 0.95);
+---
+
+<Layout
+  ogImage="og/se-avessi-giocato.png"
+  title="Se avessi giocato al SuperEnalotto: strategie contro scimmia"
+  description={`Ritardatari, numeri caldi, sempre gli stessi numeri: quanto avresti vinto giocando al SuperEnalotto dal ${new Date(sim.first.date).getUTCFullYear()}? Simulazione con le quote reali contro ${int(sim.players)} scimmie che giocano a caso.`}
+>
+  <h1>Se avessi giocato…</h1>
+  <p class="lead">
+    Una colonna a ogni concorso per {years} anni, dal {date(sim.first.date)} al {date(sim.last.date)}: {int(sim.draws)} giocate,
+    {eur(sim.spent)} spesi. Con le quote vere pagate ogni sera. Cinque strategie "furbe" contro {int(sim.players)} scimmie
+    che scelgono sei numeri a caso ogni volta.
+  </p>
+
+  <h2>Strategie contro scimmie</h2>
+  <p class="prose">
+    Ogni pannello è il saldo nel tempo di una strategia (la linea blu). La fascia grigia è dove finiscono 9 scimmie su 10,
+    la linea grigia è la scimmia "media". Scende sempre: è quello che resta al giocatore dopo che il banco ha fatto il suo
+    lavoro.
+  </p>
+  <div class="panels">
+    {
+      sim.strategies.map((s) => (
+        <div class="card">
+          <BalancePanel id={`p-${s.key}`} title={s.label} dates={c.dates} values={c.strategies[s.key]!} band={band} domain={domain} />
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="card table-scroll results">
+    <table>
+      <thead>
+        <tr>
+          <th>Strategia</th>
+          <th class="num">Speso</th>
+          <th class="num">Vinto</th>
+          <th class="num">Recuperato</th>
+          <th class="num">Vincita migliore</th>
+          <th class="num">Scimmie che hanno fatto meglio</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          sim.strategies.map((s) => (
+            <tr>
+              <td>{s.label}</td>
+              <td class="num">{eur(s.spent)}</td>
+              <td class="num">{eur(s.won)}</td>
+              <td class="num">{pct(s.returned)}</td>
+              <td class="num">{s.best_win ? eur(s.best_win) : "–"}</td>
+              <td class="num">{int(s.monkeys_better)} su {int(sim.players)}</td>
+            </tr>
+          ))
+        }
+        <tr class="monkey-row">
+          <td><Icon name="monkey" size={20} /> La scimmia mediana</td>
+          <td class="num">{eur(sim.spent)}</td>
+          <td class="num">{eur(sim.spent * medianReturn)}</td>
+          <td class="num">{pct(medianReturn)}</td>
+          <td class="num">–</td>
+          <td class="num">{int(sim.players / 2)} su {int(sim.players)}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong>{" "}
+      {
+        outside.length === 0
+          ? "nessuna strategia esce dalla fascia delle scimmie."
+          : `${outside.map((s) => `"${s.label}"`).join(" e ")} ${outside.length === 1 ? "finisce" : "finiscono"} fuori dalla fascia, ma ${outside.every((s) => s.monkeys_better > sim.players / 2) ? "in basso: ha fatto peggio di quasi tutte le scimmie" : "per poco"}. Non è un segnale: con ${sim.strategies.length} strategie e una fascia che contiene 9 scimmie su 10, la probabilità che almeno una ne esca per puro caso è del ${pct(1 - 0.9 ** sim.strategies.length)}.`
+      }{" "}
+      La scimmia mediana recupera il {pct(medianReturn)} di quello che spende e solo {int(sim.monkeys.in_profit)} scimmie su{" "}
+      {int(sim.players)} chiudono in attivo. Chi ci riesce ha avuto fortuna, non un metodo: la prossima volta toccherà a
+      un'altra scimmia.
+    </p>
+  </Verdict>
+
+  <h2 id="prova">Prova con i tuoi numeri</h2>
+  <p class="prose">
+    Scegli 6 numeri, per esempio quelli che giochi davvero, e scopri come sarebbe andata giocandoli a ogni concorso dal
+    {date(sim.first.date)}. Il calcolo avviene nel tuo browser: i numeri non vengono inviati da nessuna parte.
+  </p>
+
+  <form class="card picker" data-monkeys={monkeyTable} data-players={sim.players}>
+    <fieldset>
+      <legend>I tuoi 6 numeri <span class="count" aria-live="polite">0/6</span></legend>
+      <div class="pick-grid">
+        {
+          Array.from({ length: 90 }, (_, i) => i + 1).map((n) => (
+            <button type="button" class="pick" data-n={n} aria-pressed="false">
+              {n}
+            </button>
+          ))
+        }
+      </div>
+    </fieldset>
+    <div class="actions">
+      <button type="button" class="btn random"><Icon name="monkey" size={22} /> Scegli come una scimmia</button>
+      <button type="button" class="btn ghost clear">Azzera</button>
+    </div>
+    <output class="outcome" aria-live="polite">
+      <p class="muted">Scegli 6 numeri per vedere il risultato.</p>
+    </output>
+  </form>
+
+  <p class="muted small">
+    Regole della simulazione: una colonna a concorso con la sestina, jolly per il 5+1, niente superstar. Costo 0,50 €
+    a colonna fino al {sim.price_change ? date(sim.price_change.date) : "cambio di regolamento"}, poi 1 € (quando è
+    arrivato anche il premio per il 2). Vincite alle quote reali di ogni concorso, al lordo delle tasse: un'ipotesi
+    generosa verso il giocatore. Se un 6 cade in un concorso senza vincitori non c'è una quota reale da usare, e la
+    vincita viene indicata a parte.
+  </p>
+</Layout>
+
+<script>
+  import game from "../data/generated/game.json";
+
+  type Row = [string, string, number[], number, number, number[]];
+  const rows = game.draws as unknown as Row[];
+  const TIERS = game.tiers;
+  const eur = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", useGrouping: "always" });
+  const intf = new Intl.NumberFormat("it-IT", { useGrouping: "always" });
+  const pct = new Intl.NumberFormat("it-IT", { style: "percent", maximumFractionDigits: 1 });
+  const dateFmt = new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
+  const form = document.querySelector<HTMLFormElement>(".picker")!;
+  const monkeys: number[] = JSON.parse(form.dataset.monkeys!);
+  const out = form.querySelector<HTMLOutputElement>(".outcome")!;
+  const count = form.querySelector(".count")!;
+  const buttons = [...form.querySelectorAll<HTMLButtonElement>(".pick")];
+  const chosen = new Set<number>();
+
+  function simulate(picks: number[]) {
+    let spent = 0;
+    let won = 0;
+    let unknown = 0;
+    let best = { amount: 0, date: "", tier: "" };
+    const byTier: Record<string, { n: number; amount: number }> = {};
+    for (const [, date, numbers, jolly, price, prizes] of rows) {
+      spent += price;
+      const matched = picks.filter((p) => numbers.includes(p)).length;
+      let tier = matched >= 2 ? matched - 2 : -1; // 2→0, 3→1, 4→2, 5→3, 6→5
+      if (matched === 6) tier = 5;
+      if (matched === 5 && picks.includes(jolly)) tier = 4;
+      if (tier < 0) continue;
+      const amount = prizes[tier]!;
+      if (amount === 0) continue; // es. il 2 prima del 2017: non era un premio
+      const label = TIERS[tier]!;
+      byTier[label] ??= { n: 0, amount: 0 };
+      byTier[label].n += 1;
+      if (amount < 0) {
+        unknown += 1;
+        continue;
+      }
+      won += amount;
+      byTier[label].amount += amount;
+      if (amount > best.amount) best = { amount, date, tier: label };
+    }
+    return { spent, won, unknown, best, byTier };
+  }
+
+  function render() {
+    count.textContent = `${chosen.size}/6`;
+    for (const b of buttons) {
+      const on = chosen.has(Number(b.dataset.n));
+      b.setAttribute("aria-pressed", String(on));
+      b.disabled = !on && chosen.size >= 6;
+    }
+    if (chosen.size < 6) {
+      out.innerHTML = `<p class="muted">Scegli ancora ${6 - chosen.size} ${6 - chosen.size === 1 ? "numero" : "numeri"}.</p>`;
+      return;
+    }
+    const picks = [...chosen].sort((a, b) => a - b);
+    const r = simulate(picks);
+    const net = r.won - r.spent;
+    const beaten = monkeys.filter((m) => m < net).length;
+    const tiers = TIERS.filter((t) => r.byTier[t])
+      .map((t) => `<li><strong>Punti ${t}</strong>: ${intf.format(r.byTier[t]!.n)} ${r.byTier[t]!.n === 1 ? "volta" : "volte"}, ${eur.format(r.byTier[t]!.amount)}</li>`)
+      .join("");
+    out.innerHTML = `
+      <p class="headline">Con <strong>${picks.join(" · ")}</strong> avresti speso <strong>${eur.format(r.spent)}</strong> e vinto
+        <strong>${eur.format(r.won)}</strong>: ${net >= 0 ? "saldo positivo di" : "ci avresti rimesso"} <strong>${eur.format(Math.abs(net))}</strong>
+        (hai recuperato il ${pct.format(r.won / r.spent)}).</p>
+      ${tiers ? `<ul>${tiers}</ul>` : "<p>Nemmeno un 2. Succede.</p>"}
+      ${r.best.amount ? `<p>Vincita più alta: ${eur.format(r.best.amount)} con il ${r.best.tier}, il ${dateFmt.format(new Date(r.best.date + "T00:00:00Z"))}.</p>` : ""}
+      ${r.unknown ? `<p><strong>Avresti fatto 6 in un concorso senza vincitori!</strong> Quella vincita non ha una quota reale ed è esclusa dal conto.</p>` : ""}
+      <p>Hai fatto meglio di <strong>${intf.format(beaten)} scimmie su ${intf.format(monkeys.length)}</strong>. ${
+        beaten > monkeys.length * 0.9 ? "Complimenti alla fortuna." : beaten < monkeys.length * 0.1 ? "La scimmia ringrazia." : "Esattamente come una scimmia qualsiasi."
+      }</p>`;
+  }
+
+  for (const b of buttons) {
+    b.addEventListener("click", () => {
+      const n = Number(b.dataset.n);
+      if (chosen.has(n)) chosen.delete(n);
+      else if (chosen.size < 6) chosen.add(n);
+      render();
+    });
+  }
+  form.querySelector(".random")!.addEventListener("click", () => {
+    chosen.clear();
+    while (chosen.size < 6) chosen.add(1 + Math.floor(Math.random() * 90));
+    render();
+  });
+  form.querySelector(".clear")!.addEventListener("click", () => {
+    chosen.clear();
+    render();
+  });
+</script>
+
+<style>
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .results {
+    margin-top: 16px;
+  }
+  .monkey-row td {
+    font-weight: 650;
+    background: var(--surface-2);
+  }
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  legend {
+    font-weight: 650;
+    margin-bottom: 10px;
+  }
+  .count {
+    color: var(--ink-2);
+    font-weight: 400;
+    margin-left: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 6px;
+  }
+  .pick {
+    min-height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+  }
+  .pick[aria-pressed="true"] {
+    background: var(--banana);
+    color: var(--banana-ink);
+    border-color: #b8860b;
+  }
+  .pick:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: inherit;
+    font-weight: 650;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: var(--ink);
+    color: var(--page);
+    cursor: pointer;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--border);
+  }
+  .outcome {
+    display: block;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .outcome :global(.headline) {
+    font-size: 1.1rem;
+  }
+  .small {
+    font-size: 0.9rem;
+    margin-top: 16px;
+  }
+</style>

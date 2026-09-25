@@ -7,9 +7,13 @@ import logging
 import sys
 from datetime import date
 
+import httpx
+
 from scimmia import update
 from scimmia.sources.official import OfficialClient
-from scimmia.store import LEGACY_DIR, Store
+from scimmia.sources.meteo import update_meteo
+from scimmia.sources.nazionale import update_nazionale
+from scimmia.store import LEGACY_DIR, METEO_PATH, NAZIONALE_PATH, Store
 
 
 def cmd_update(args: argparse.Namespace) -> int:
@@ -23,6 +27,17 @@ def cmd_update(args: argparse.Namespace) -> int:
         f"mesi letti: {report.months} · nuove estrazioni: {report.new_draws} · "
         f"nuovi dettagli: {report.new_details} · totale archivio: {len(store.draws)}"
     )
+    # il meteo è un di più: se Open-Meteo non risponde le estrazioni restano aggiornate
+    try:
+        days = update_meteo(METEO_PATH, first=date(1997, 12, 1))
+        print(f"meteo: {days} giorni aggiunti")
+    except httpx.HTTPError as exc:
+        logging.warning("meteo non aggiornato: %s", exc)
+    try:
+        matches = update_nazionale(NAZIONALE_PATH)
+        print(f"nazionale: {matches} partite nuove")
+    except httpx.HTTPError as exc:
+        logging.warning("partite della Nazionale non aggiornate: %s", exc)
     return 0
 
 

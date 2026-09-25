@@ -1,0 +1,74 @@
+---
+import DelayChart from "../components/DelayChart.astro";
+import Verdict from "../components/Verdict.astro";
+import Layout from "../layouts/Layout.astro";
+import { honesty, numbers, P_HIT, summary } from "../lib/data";
+import { date, del, Il, int, pct, url } from "../lib/format";
+
+const buckets = honesty.delay_fallacy;
+const opportunities = buckets.reduce((s, b) => s + b.opportunities, 0);
+const top = [...numbers].sort((a, b) => b.delay.current - a.delay.current).slice(0, 10);
+const record = [...numbers].sort((a, b) => b.delay.max - a.delay.max)[0]!;
+---
+
+<Layout
+  ogImage="og/ritardatari.png"
+  title="Numeri ritardatari del SuperEnalotto: il mito alla prova dei dati"
+  description={`I numeri ritardatari del SuperEnalotto escono più spesso? Lo abbiamo verificato su ${int(summary.draws)} estrazioni: la risposta è no. Ecco i dati e i ritardatari di oggi.`}
+>
+  <h1>Il mito del ritardatario</h1>
+  <p class="lead">
+    "{Il(top[0]!.number)} non esce da {top[0]!.delay.current} estrazioni, prima o poi deve uscire." È il ragionamento più
+    diffuso tra i giocatori, e ha anche un nome: <em>fallacia dello scommettitore</em>. Qui lo mettiamo alla prova su
+    tutte le estrazioni dal 1997.
+  </p>
+
+  <h2>L'esperimento</h2>
+  <p class="prose">
+    Prima di ogni estrazione abbiamo annotato il ritardo di ognuno dei 90 numeri. Poi abbiamo controllato se è uscito.
+    Sono {int(opportunities)} "occasioni" in tutto. Se il mito fosse vero, i numeri in ritardo dovrebbero uscire più spesso,
+    e i punti del grafico dovrebbero salire verso destra.
+  </p>
+  <div class="card"><DelayChart buckets={buckets} /></div>
+  <p class="prose muted">
+    I punti a destra hanno baffi più lunghi perché i ritardi molto lunghi sono rari: meno occasioni, più incertezza.
+    Tutti i baffi comprendono la linea del caso.
+  </p>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong> la linea è piatta. Un numero in ritardo da 5 estrazioni o da 100 esce con la
+      stessa frequenza: circa {pct(P_HIT)}, cioè 1 volta su 15. Le palline non sanno da quanto tempo sono nell'urna.
+    </p>
+  </Verdict>
+
+  <h2>E allora perché i ritardi lunghi esistono?</h2>
+  <p class="prose">
+    Perché con 90 numeri qualcuno resta indietro per forza. Un numero ha il {pct((1 - P_HIT) ** 50)} di probabilità di
+    non uscire per 50 estrazioni di fila: poco per un singolo numero, ma con 90 numeri che corrono insieme succede di
+    continuo. Il record storico è {del(record.number)}, rimasto fuori per {int(record.delay.max)} estrazioni. Anche
+    quello è compatibile con il caso.
+  </p>
+
+  <h2>I ritardatari di oggi</h2>
+  <p class="prose">Per completezza, e per chi li cerca comunque. Non sono un consiglio.</p>
+  <div class="card table-scroll">
+    <table>
+      <thead>
+        <tr><th>Numero</th><th class="num">Ritardo</th><th class="num">Record storico</th><th>Ultima uscita</th></tr>
+      </thead>
+      <tbody>
+        {
+          top.map((n) => (
+            <tr>
+              <td><a class="ball sm" href={url(`numeri/${n.number}`)}>{n.number}</a></td>
+              <td class="num">{int(n.delay.current)}</td>
+              <td class="num">{int(n.delay.max)}</td>
+              <td>{n.delay.last_seen ? date(n.delay.last_seen) : "–"}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</Layout>

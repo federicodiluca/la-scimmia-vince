@@ -1,0 +1,34 @@
+---
+import type { Draw } from "../lib/data";
+import { url } from "../lib/format";
+
+interface Props {
+  draw: Draw;
+  small?: boolean;
+}
+const { draw, small = false } = Astro.props;
+---
+
+<ul class="balls" aria-label={`Sestina ${draw.n.join(", ")}, jolly ${draw.j}${draw.s ? `, superstar ${draw.s}` : ""}`}>
+  {
+    draw.n.map((n) => (
+      <li>
+        <a class:list={["ball", { sm: small }]} href={url(`numeri/${n}`)}>
+          {n}
+        </a>
+      </li>
+    ))
+  }
+  <li>
+    <span class:list={["ball jolly", { sm: small }]} title="Jolly">{draw.j}</span>
+  </li>
+  {
+    draw.s && (
+      <li>
+        <span class:list={["ball star", { sm: small }]} title="SuperStar">
+          {draw.s}
+        </span>
+      </li>
+    )
+  }
+</ul>

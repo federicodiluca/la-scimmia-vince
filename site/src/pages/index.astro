@@ -1,0 +1,209 @@
+---
+import DrawBalls from "../components/DrawBalls.astro";
+import FrequencyChart from "../components/FrequencyChart.astro";
+import Icon from "../components/Icon.astro";
+import Verdict from "../components/Verdict.astro";
+import Layout from "../layouts/Layout.astro";
+import { drawPath, frequency, honesty, summary } from "../lib/data";
+import { date, dec, eur, eurShort, il, int, pct, url, weekday } from "../lib/format";
+
+const last = summary.last_draw;
+const band = frequency.band;
+const fakes = honesty.fake_discoveries;
+const naive = fakes.naive_discoveries;
+const expectedFakes = fakes.expected_false_positives;
+const survivors = fakes.survivors_after_correction;
+const tests = fakes.tests;
+const late = honesty.delay_fallacy.filter((b) => ["75-99", "100-149", "150+"].includes(b.delay));
+const lateHits = late.reduce((s, b) => s + b.hits, 0);
+const lateOpp = late.reduce((s, b) => s + b.opportunities, 0);
+const years = new Date(summary.last_draw.date).getUTCFullYear() - new Date(summary.first_date).getUTCFullYear();
+const jackpot = summary.jackpot;
+
+const sections = [
+  { href: url("se-avessi-giocato"), icon: "banana", title: "Se avessi giocato…", text: "Ritardatari, numeri caldi, sempre gli stessi: quanto avresti vinto dal 2009 con le quote vere? E con i tuoi numeri?" },
+  { href: url("numeri"), icon: "die", title: "I 90 numeri", text: "Uscite, ritardi e compagni di sestina di ogni numero. Con il confronto che gli altri non fanno: quanto ci si aspettava per caso." },
+  { href: url("ritardatari"), icon: "calendar", title: "Il mito del ritardatario", text: "Un numero che non esce da 100 estrazioni è \"maturo\"? Lo abbiamo verificato su tutte le estrazioni." },
+  { href: url("correlazioni"), icon: "lens", title: "Correlazioni assurde", text: "Il 17 esce di più il martedì? A cercare bene si trova sempre qualcosa. Ecco perché non conta." },
+] as const;
+---
+
+<Layout
+  title="La Scimmia Vince"
+  description={`Statistiche oneste sul SuperEnalotto: ${int(summary.draws)} estrazioni dal 1997 analizzate. Numeri caldi, freddi e ritardatari messi alla prova: il caso non ha memoria.`}
+>
+  <section class="hero">
+    <div>
+      <p class="kicker">SuperEnalotto · {int(summary.draws)} estrazioni in {years} anni</p>
+      <h1>Il caso non ha memoria.<br />La scimmia lo sa.</h1>
+      <p class="lead">
+        Numeri caldi, freddi, ritardatari, "sistemi": abbiamo messo alla prova tutte le estrazioni del SuperEnalotto
+        dal 1997 a oggi. Una scimmia che sceglie sei numeri a caso fa esattamente come chi segue le strategie. Né
+        meglio né peggio.
+      </p>
+    </div>
+    <Icon name="monkey" size={180} class="hero-monkey" />
+  </section>
+
+  <section class="card last" aria-labelledby="last-title">
+    <div>
+      <h2 id="last-title">Ultima estrazione</h2>
+      <p class="muted">
+        Concorso n. {Number(last.id.split("-")[1])} di{" "}
+        <a href={url(drawPath(last))}>{weekday(last.date)} {date(last.date)}</a>
+      </p>
+      <DrawBalls draw={last} />
+    </div>
+    {
+      jackpot?.pool_total_eur && jackpot.draw_id === last.id && (
+        <div class="tile jackpot">
+          <div class="label">Montepremi del concorso</div>
+          <div class="value">{eurShort(jackpot.pool_total_eur)}</div>
+          {jackpot.last_six && (
+            <p class="note">
+              {`Ultimo "6": ${date(jackpot.last_six.date)}, ${int(jackpot.last_six.draws_since)} estrazioni fa (${eur(jackpot.last_six.amount_eur)}).`}
+            </p>
+          )}
+        </div>
+      )
+    }
+  </section>
+
+  <h2>Tre cose che i siti di pronostici non ti dicono</h2>
+  <div class="grid grid-3">
+    <div class="card tile">
+      <div class="label">Numeri "caldi" o "freddi" davvero anomali</div>
+      <div class="value">{band.outside} su 90</div>
+      <p class="note">Per puro caso ce ne aspettavamo circa {dec(90 * (1 - band.confidence), 1)}. Cioè: nessuna anomalia.</p>
+    </div>
+    <div class="card tile">
+      <div class="label">"Scoperte" tipo "l'81 esce di più il sabato"</div>
+      <div class="value">{int(naive)} → {survivors}</div>
+      <p class="note">
+        Su {int(tests)} confronti ce ne aspettavamo {int(Math.round(expectedFakes))} per caso. Dopo la verifica statistica{" "}
+        {survivors === 0 ? "non ne resta nessuna" : survivors === 1 ? "ne resta una" : `ne restano ${survivors}`}.
+      </p>
+    </div>
+    <div class="card tile">
+      <div class="label">Un ritardatario (75+ estrazioni) esce</div>
+      <div class="value">{pct(lateHits / lateOpp)}</div>
+      <p class="note">delle volte. Un numero qualsiasi: {pct(6 / 90)}. Il ritardo non conta.</p>
+    </div>
+  </div>
+
+  <h2>Numeri caldi e freddi? Rumore.</h2>
+  <p class="prose">
+    Ogni barra è un numero: quanto è uscito più (o meno) di quanto ci si aspetta in {int(summary.draws)} estrazioni,
+    cioè circa {dec(band.expected, 0)} volte. La fascia grigia è dove cade un numero nel {Math.round(band.confidence * 100)}%
+    dei casi <em>anche con un'urna perfettamente onesta</em>. Tocca una barra per aprire la scheda del numero.
+  </p>
+  <div class="card"><FrequencyChart counts={frequency.numbers} band={band} /></div>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong> {il(honesty.uniformity.numbers.most)} è il numero uscito di più
+      ({int(honesty.uniformity.numbers.most_count)} volte), {il(honesty.uniformity.numbers.least)} quello uscito di meno
+      ({int(honesty.uniformity.numbers.least_count)}). Sembra tanta differenza, ma il test del chi-quadro dà p = {dec(honesty.uniformity.numbers.p_value, 2)}:
+      è esattamente la varietà che produce il caso. Giocare {il(honesty.uniformity.numbers.most)} non aumenta le tue probabilità.
+    </p>
+  </Verdict>
+
+  <h2>Da dove cominciare</h2>
+  <div class="grid grid-2">
+    {
+      sections.map((s) => (
+        <a class="card section-link" href={s.href}>
+          <Icon name={s.icon} size={44} />
+          <h3>{s.title}</h3>
+          <p>{s.text}</p>
+        </a>
+      ))
+    }
+  </div>
+
+  <section class="card odds">
+    <Icon name="banana" size={56} />
+    <div>
+      <h2>La probabilità di fare 6</h2>
+      <p class="odds-value">1 su 622.614.630</p>
+      <p class="muted">
+        È come indovinare un preciso secondo in un periodo di quasi 20 anni. Ogni estrazione, ogni combinazione: sempre la
+        stessa probabilità, qualunque cosa sia uscita prima.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    margin: 8px 0 32px;
+  }
+  .kicker {
+    color: var(--ink-2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.85rem;
+  }
+  :global(.hero-monkey) {
+    width: clamp(110px, 18vw, 180px);
+    height: auto;
+    transform: rotate(-6deg);
+  }
+  @media (max-width: 640px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+    :global(.hero-monkey) {
+      order: -1;
+    }
+  }
+  .last {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: center;
+  }
+  .last h2 {
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+  }
+  .jackpot {
+    min-width: 220px;
+  }
+  .section-link {
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform 0.12s;
+  }
+  .section-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--banana);
+  }
+  .section-link h3 {
+    margin-top: 10px;
+  }
+  .section-link p {
+    color: var(--ink-2);
+    margin: 0;
+  }
+  .odds {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 40px;
+  }
+  .odds h2 {
+    margin: 0;
+  }
+  .odds-value {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 750;
+    margin: 4px 0 8px;
+  }
+</style>

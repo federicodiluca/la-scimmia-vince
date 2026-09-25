@@ -1,0 +1,170 @@
+---
+// Quanto spesso esce un numero in funzione del suo ritardo: punto = frequenza osservata,
+// baffi = intervallo di confidenza al 95%, linea = 1/15 (quello che dice il caso).
+import type { DelayBucket } from "../lib/data";
+import { int, pct } from "../lib/format";
+
+interface Props {
+  buckets: DelayBucket[];
+}
+const { buckets } = Astro.props;
+
+const W = 720;
+const H = 300;
+const m = { l: 52, r: 16, t: 16, b: 44 };
+const pw = W - m.l - m.r;
+const ph = H - m.t - m.b;
+const max = Math.max(0.16, ...buckets.map((b) => b.ci_high));
+const y = (v: number) => m.t + ph - (v / max) * ph;
+const slot = pw / buckets.length;
+const cx = (i: number) => m.l + slot * (i + 0.5);
+const ticks = [0, 0.04, 0.08, 0.12, 0.16].filter((t) => t <= max + 1e-9);
+const expected = buckets[0]?.expected ?? 6 / 90;
+---
+
+<figure class="viz">
+  <div class="legend" aria-hidden="true">
+    <span><i class="dot"></i>frequenza di uscita osservata</span>
+    <span><i class="whisker"></i>margine d'errore (95%)</span>
+    <span><i class="ref"></i>il caso: 1 su 15</span>
+  </div>
+  <div class="chart-scroll"><svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="delay-title">
+    <title id="delay-title">Frequenza di uscita di un numero in base al suo ritardo</title>
+    {
+      ticks.map((t) => (
+        <g>
+          <line class="grid" x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} />
+          <text class="tick" x={m.l - 8} y={y(t)} dy="0.32em" text-anchor="end">
+            {pct(t)}
+          </text>
+        </g>
+      ))
+    }
+    <line class="ref" x1={m.l} x2={W - m.r} y1={y(expected)} y2={y(expected)}></line>
+    <text class="ref-label" x={W - m.r} y={y(expected) - 8} text-anchor="end">il caso: {pct(expected)}</text>
+    {
+      buckets.map((b, i) => (
+        <g
+          tabindex="0"
+          data-tip={`Ritardo ${b.delay}: uscito ${int(b.hits)} volte su ${int(b.opportunities)} occasioni = ${pct(b.hit_rate)} (margine ${pct(b.ci_low)}–${pct(b.ci_high)})`}
+        >
+          <rect class="hit" x={m.l + slot * i} width={slot} y={m.t} height={ph} />
+          <line class="whisker" x1={cx(i)} x2={cx(i)} y1={y(b.ci_low)} y2={y(b.ci_high)} />
+          <circle class="dot" cx={cx(i)} cy={y(b.hit_rate)} r="6" />
+          <text class="tick" x={cx(i)} y={H - m.b + 20} text-anchor="middle">
+            {b.delay}
+          </text>
+        </g>
+      ))
+    }
+    <text class="axis-title" x={m.l + pw / 2} y={H - 4} text-anchor="middle">ritardo (estrazioni senza uscire)</text>
+  </svg></div>
+  <details class="data-table">
+    <summary>Mostra i dati in tabella</summary>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Ritardo</th><th class="num">Occasioni</th><th class="num">Uscite</th><th class="num">Frequenza</th><th class="num">Margine 95%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            buckets.map((b) => (
+              <tr>
+                <td>{b.delay}</td>
+                <td class="num">{int(b.opportunities)}</td>
+                <td class="num">{int(b.hits)}</td>
+                <td class="num">{pct(b.hit_rate)}</td>
+                <td class="num">{pct(b.ci_low)}–{pct(b.ci_high)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>
+
+<style>
+  .viz {
+    margin: 0;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .grid {
+    stroke: var(--grid);
+  }
+  .tick {
+    fill: var(--muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .axis-title {
+    fill: var(--ink-2);
+    font-size: 13px;
+  }
+  .ref {
+    stroke: var(--ink-2);
+    stroke-width: 2;
+  }
+  .ref-label {
+    fill: var(--ink-2);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .whisker {
+    stroke: var(--series-1);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.55;
+  }
+  .dot {
+    fill: var(--series-1);
+    stroke: var(--surface);
+    stroke-width: 2;
+  }
+  .hit {
+    fill: transparent;
+  }
+  g[tabindex]:focus-visible {
+    outline: none;
+  }
+  g[tabindex]:focus-visible .hit,
+  g[tabindex]:hover .hit {
+    fill: var(--band);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+  }
+  .legend i {
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .legend .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--series-1);
+  }
+  .legend .whisker {
+    width: 2px;
+    height: 14px;
+    background: var(--series-1);
+    opacity: 0.55;
+  }
+  .legend .ref {
+    width: 16px;
+    height: 2px;
+    background: var(--ink-2);
+  }
+</style>

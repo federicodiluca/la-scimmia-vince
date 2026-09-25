@@ -1,0 +1,208 @@
+---
+import DrawBalls from "../../../components/DrawBalls.astro";
+import Icon from "../../../components/Icon.astro";
+import Verdict from "../../../components/Verdict.astro";
+import Layout from "../../../layouts/Layout.astro";
+import { details, drawPath, draws, drawSlug, type Draw } from "../../../lib/data";
+import { date, eur, eurCents, il, Il, int, url, weekday } from "../../../lib/format";
+
+export function getStaticPaths() {
+  return draws.map((draw, i) => ({
+    params: { anno: draw.date.slice(0, 4), giorno: drawSlug(draw.date) },
+    props: { draw, prev: draws[i - 1], next: draws[i + 1] },
+  }));
+}
+
+interface Props {
+  draw: Draw;
+  prev?: Draw;
+  next?: Draw;
+}
+const { draw, prev, next } = Astro.props;
+const contest = Number(draw.id.split("-")[1]);
+const when = `${weekday(draw.date)} ${date(draw.date)}`;
+const detail = details[draw.id];
+const main = detail?.tiers.filter(([game]) => game === "superenalotto") ?? [];
+const star = detail?.tiers.filter(([game]) => game === "superstar") ?? [];
+const six = main.find(([, cat]) => cat === "Punti 6");
+
+const sum = draw.n.reduce((a, b) => a + b, 0);
+const even = draw.n.filter((n) => n % 2 === 0).length;
+const withDelay = draw.n.map((n, i) => ({ n, d: draw.d[i]! })).sort((a, b) => b.d - a.d);
+const longest = withDelay[0]!;
+const freshest = withDelay.at(-1)!;
+const sorted = [...draw.n].sort((a, b) => a - b);
+const consecutive = sorted.filter((n, i) => i > 0 && n - sorted[i - 1]! === 1).length;
+
+const title = `Estrazione SuperEnalotto del ${date(draw.date)}`;
+const description = `Numeri vincenti del SuperEnalotto di ${when} (concorso ${contest}): ${draw.n.join(", ")}, jolly ${draw.j}${draw.s ? `, superstar ${draw.s}` : ""}.${detail ? " Quote, vincitori e montepremi." : ""}`;
+---
+
+<Layout
+  title={title}
+  description={description}
+  jsonLd={{
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Archivio", item: new URL(url("estrazioni"), Astro.site).href },
+      { "@type": "ListItem", position: 2, name: draw.date.slice(0, 4), item: new URL(url(`estrazioni/${draw.date.slice(0, 4)}`), Astro.site).href },
+      { "@type": "ListItem", position: 3, name: date(draw.date) },
+    ],
+  }}
+>
+  <nav class="crumbs" aria-label="Percorso">
+    <a href={url("estrazioni")}>Archivio</a> › <a href={url(`estrazioni/${draw.date.slice(0, 4)}`)}>{draw.date.slice(0, 4)}</a> ›
+    {date(draw.date)}
+  </nav>
+  <h1>Estrazione del {date(draw.date)}</h1>
+  <p class="lead">Concorso n. {contest} del SuperEnalotto, {when}.</p>
+
+  <div class="card draw">
+    <DrawBalls draw={draw} />
+    <p class="muted legend">Sestina vincente · <span class="key jolly"></span> jolly{draw.s && <> · <span class="key star"></span> superstar</>}</p>
+  </div>
+
+  {
+    detail && (
+      <>
+        <h2>Quote e vincitori</h2>
+        {six && six[2] > 0 ? (
+          <p class="prose">
+            <strong>
+              Quella sera è stato centrato il 6: {int(six[2])} {six[2] === 1 ? "vincitore" : "vincitori"} da {eurCents(six[3] ?? 0)}.
+            </strong>
+          </p>
+        ) : (
+          detail.pool && <p class="prose">Nessun 6. Il montepremi del concorso era di {eur(detail.pool)}.</p>
+        )}
+        <div class="grid grid-2">
+          <div class="card table-scroll">
+            <table>
+              <caption>SuperEnalotto</caption>
+              <thead>
+                <tr><th>Categoria</th><th class="num">Vincitori</th><th class="num">Quota</th></tr>
+              </thead>
+              <tbody>
+                {main.map(([, cat, winners, amount]) => (
+                  <tr>
+                    <td>{cat}</td>
+                    <td class="num">{int(winners)}</td>
+                    <td class="num">{amount ? eurCents(amount) : "–"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {star.length > 0 && (
+            <div class="card table-scroll">
+              <table>
+                <caption>SuperStar</caption>
+                <thead>
+                  <tr><th>Categoria</th><th class="num">Vincitori</th><th class="num">Quota</th></tr>
+                </thead>
+                <tbody>
+                  {star.map(([, cat, winners, amount]) => (
+                    <tr>
+                      <td>{cat}</td>
+                      <td class="num">{int(winners)}</td>
+                      <td class="num">{amount ? eurCents(amount) : "–"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </>
+    )
+  }
+
+  <h2>Curiosità (oneste)</h2>
+  <ul class="facts">
+    <li>
+      <Icon name="calendar" size={24} />
+      <span>
+        Il più "atteso" era {il(longest.n)}: non usciva da {int(longest.d)} estrazioni.{" "}
+        {`Il più "fresco" ${il(freshest.n)}, ${freshest.d === 0 ? "uscito anche nel concorso precedente" : `uscito ${int(freshest.d)} estrazioni prima`}.`}{" "}
+        Né l'uno né l'altro aveva più probabilità degli altri: <a href={url("ritardatari")}>il ritardo non conta</a>.
+      </span>
+    </li>
+    <li>
+      <Icon name="die" size={24} />
+      <span>
+        Somma dei numeri: {sum} (in media una sestina somma 273). Pari: {even} su 6.{" "}
+        {consecutive > 0 ? `Contiene ${consecutive === 1 ? "una coppia" : `${consecutive} coppie`} di numeri consecutivi, cosa che capita in circa 3 estrazioni su 10.` : "Nessun numero consecutivo."}
+      </span>
+    </li>
+    <li>
+      <Icon name="banana" size={24} />
+      <span>
+        La probabilità di indovinare questa sestina era 1 su 622.614.630: esattamente la stessa di 1 2 3 4 5 6, che nessuno
+        gioca perché "non esce mai".
+      </span>
+    </li>
+  </ul>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong> al prossimo concorso {il(draw.n[0]!)}, {il(draw.n[1]!)} e gli altri hanno la stessa
+      probabilità di tutti gli altri numeri. {Il(draw.n[0]!)} non sa di essere appena uscito.
+    </p>
+  </Verdict>
+
+  <nav class="pager" aria-label="Altre estrazioni">
+    {prev ? <a href={url(drawPath(prev))}>← {date(prev.date)}</a> : <span />}
+    <a href={url(`estrazioni/${draw.date.slice(0, 4)}`)}>Tutto il {draw.date.slice(0, 4)}</a>
+    {next ? <a href={url(drawPath(next))}>{date(next.date)} →</a> : <span />}
+  </nav>
+</Layout>
+
+<style>
+  .crumbs {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .draw .legend {
+    margin: 12px 0 0;
+    font-size: 0.9rem;
+  }
+  .key {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    vertical-align: -1px;
+  }
+  .key.jolly {
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 2px var(--axis);
+  }
+  .key.star {
+    background: var(--fur);
+  }
+  caption {
+    text-align: left;
+    font-weight: 700;
+    padding-bottom: 6px;
+  }
+  .facts {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+    max-width: 72ch;
+  }
+  .facts li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+  }
+</style>

@@ -114,12 +114,18 @@ def check_sequence(store: Store) -> list[str]:
     return problems
 
 
+# differenze tra le fonti già verificate: vale il dato ufficiale
+KNOWN_DIFFERENCES = {
+    "2015-129": "TuttoSuperenalotto riporta 14 al posto di 13",
+}
+
+
 def compare_sources(store: Store, directory: Path = LEGACY_DIR) -> list[str]:
     """Differenze tra archivio legacy e ufficiale sui concorsi in comune."""
     problems = []
     for old in legacy.load_legacy_dir(directory):
         new = store.draws.get(old.id)
-        if new is None or new.source != official.SOURCE:
+        if new is None or new.source != official.SOURCE or old.id in KNOWN_DIFFERENCES:
             continue
         for attr in ("date", "numbers", "jolly", "superstar"):
             a, b = getattr(old, attr), getattr(new, attr)

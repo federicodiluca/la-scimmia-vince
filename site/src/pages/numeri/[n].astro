@@ -1,0 +1,164 @@
+---
+import FrequencyChart from "../../components/FrequencyChart.astro";
+import Icon from "../../components/Icon.astro";
+import Verdict from "../../components/Verdict.astro";
+import YearChart from "../../components/YearChart.astro";
+import Layout from "../../layouts/Layout.astro";
+import { drawsPerYear, frequency, numbers, numberStats, P_HIT, summary, type NumberStats } from "../../lib/data";
+import { al, date, dec, del, il, Il, int, pct, url } from "../../lib/format";
+
+export function getStaticPaths() {
+  return numbers.map((n) => ({ params: { n: String(n.number) } }));
+}
+
+const n = Number(Astro.params.n);
+const s: NumberStats = numberStats(n);
+const band = frequency.band;
+const dev = s.count - band.expected;
+const kind = s.count > band.high ? "sopra" : s.count < band.low ? "sotto" : "dentro";
+const perYear = drawsPerYear();
+const prev = n > 1 ? n - 1 : 90;
+const next = n < 90 ? n + 1 : 1;
+// probabilità che un numero resti fuori per almeno `current` estrazioni di fila
+const pDelay = (1 - P_HIT) ** s.delay.current;
+const pairsExpected = (summary.draws * (6 * 5)) / (90 * 89);
+
+const description = `Il numero ${n} al SuperEnalotto: uscito ${int(s.count)} volte in ${int(summary.draws)} estrazioni (attese ${dec(band.expected, 0)}), ritardo attuale ${s.delay.current}, record ${s.delay.max}. Statistiche oneste, senza pronostici.`;
+---
+
+<Layout
+  ogImage={`og/numeri/${n}.png`}
+  title={`Numero ${n} al SuperEnalotto: uscite, ritardo e statistiche`}
+  description={description}
+  jsonLd={{
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Numeri", item: new URL(url("numeri"), Astro.site).href },
+      { "@type": "ListItem", position: 2, name: `Numero ${n}` },
+    ],
+  }}
+>
+  <nav class="crumbs" aria-label="Percorso"><a href={url("numeri")}>Numeri</a> › {n}</nav>
+  <div class="head">
+    <span class="ball big" aria-hidden="true">{n}</span>
+    <div>
+      <h1>Il numero {n}</h1>
+      <p class="lead">
+        Uscito <strong>{int(s.count)} volte</strong> su {int(summary.draws)} estrazioni:{" "}
+        {`${dev >= 0 ? "+" : ""}${dec(dev, 0)} rispetto alle ${dec(band.expected, 0)} attese`}, {kind} la fascia del caso. È
+        il {s.rank}° numero più uscito.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card tile">
+      <div class="label">Ritardo attuale</div>
+      <div class="value">{int(s.delay.current)}</div>
+      <p class="note">
+        {
+          s.delay.current === 0
+            ? `È uscito nell'ultima estrazione (${date(s.delay.last_seen!)}). Al prossimo concorso non ha né più né meno possibilità di prima.`
+            : `estrazioni, ultima uscita il ${date(s.delay.last_seen!)}. Un ritardo così lungo capita a un numero qualsiasi nel ${pct(pDelay)} dei casi.`
+        }
+      </p>
+    </div>
+    <div class="card tile">
+      <div class="label">Ritardo record</div>
+      <div class="value">{int(s.delay.max)}</div>
+      <p class="note">In media esce ogni {s.delay.mean ? dec(s.delay.mean + 1, 1) : "–"} estrazioni (atteso: 15).</p>
+    </div>
+    <div class="card tile">
+      <div class="label">Come jolly e superstar</div>
+      <div class="value">{int(s.jolly)} · {int(s.superstar)}</div>
+      <p class="note">volte jolly · volte superstar (da quando esiste, fine 2006).</p>
+    </div>
+  </div>
+
+  <h2>Anno per anno</h2>
+  <p class="prose">
+    Le barre sono le uscite {del(n)}, le lineette quanto ci si aspettava per caso in quell'anno. L'atteso cambia perché
+    sono cambiate le estrazioni a settimana: 2 fino al 2005, poi 3, oggi 4. Gli anni "d'oro" e quelli "neri" si
+    alternano senza alcuno schema.
+  </p>
+  <div class="card"><YearChart number={n} byYear={s.by_year} drawsPerYear={perYear} /></div>
+
+  <h2>I compagni di sestina</h2>
+  <p class="prose">
+    I numeri usciti più spesso insieme {al(n)}. Per caso ogni coppia esce insieme circa {dec(pairsExpected, 0)} volte. Il
+    primo della lista arriva a {s.partners[0]?.count}: sembra un'amicizia, ma con 89 compagni possibili è normale che
+    qualcuno spicchi. Succede a tutti i 90 numeri.
+  </p>
+  <ul class="partners">
+    {
+      s.partners.map((p) => (
+        <li>
+          <a class="ball sm" href={url(`numeri/${p.number}`)}>{p.number}</a>
+          <span class="tabular">{int(p.count)} volte</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2>{Il(n)} tra gli altri 89</h2>
+  <div class="card"><FrequencyChart counts={frequency.numbers} band={band} highlight={n} /></div>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong> al prossimo concorso {il(n)} ha la stessa probabilità di sempre di uscire, cioè
+      1 su 15 ({pct(P_HIT)}). Non importa quante volte è uscito né da quanto manca: le palline non ricordano.
+    </p>
+  </Verdict>
+
+  <nav class="pager" aria-label="Altri numeri">
+    <a href={url(`numeri/${prev}`)}>← {Il(prev)}</a>
+    <a href={url("numeri")}><Icon name="die" size={20} /> Tutti i numeri</a>
+    <a href={url(`numeri/${next}`)}>{Il(next)} →</a>
+  </nav>
+</Layout>
+
+<style>
+  .crumbs {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .head {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .ball.big {
+    width: 96px;
+    height: 96px;
+    font-size: 2.6rem;
+    flex: none;
+  }
+  @media (max-width: 560px) {
+    .head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+  .partners {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .partners li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-2);
+  }
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+</style>

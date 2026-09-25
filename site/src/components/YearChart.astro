@@ -1,0 +1,151 @@
+---
+// Uscite di un numero anno per anno, con il valore atteso per caso (che cambia con
+// il numero di estrazioni dell'anno: 2 a settimana fino al 2005, poi 3, poi 4).
+import { dec, del, int } from "../lib/format";
+import { columnPath, niceStep } from "../lib/svg";
+
+interface Props {
+  number: number;
+  byYear: Record<string, number>;
+  drawsPerYear: Record<string, number>;
+}
+const { number, byYear, drawsPerYear } = Astro.props;
+
+const P = 6 / 90;
+const rows = Object.entries(byYear).map(([year, count]) => ({
+  year,
+  count,
+  expected: (drawsPerYear[year] ?? 0) * P,
+}));
+
+const W = 900;
+const H = 260;
+const m = { l: 36, r: 8, t: 14, b: 30 };
+const pw = W - m.l - m.r;
+const ph = H - m.t - m.b;
+const top = Math.max(...rows.map((r) => Math.max(r.count, r.expected)));
+const step = niceStep(top, 4);
+const max = Math.ceil(top / step) * step;
+const y = (v: number) => m.t + ph - (v / max) * ph;
+const slot = pw / rows.length;
+const bw = Math.min(24, slot - 2);
+const ticks: number[] = [];
+for (let v = 0; v <= max; v += step) ticks.push(v);
+const labelEvery = rows.length > 20 ? 5 : 1;
+---
+
+<figure class="viz">
+  <div class="legend" aria-hidden="true">
+    <span><i class="sw bar"></i>uscite {del(number)}</span>
+    <span><i class="sw exp"></i>attese per puro caso</span>
+  </div>
+  <div class="chart-scroll"><svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Uscite del numero ${number} per anno, con le uscite attese per caso`}>
+    {
+      ticks.map((t) => (
+        <g>
+          <line class="grid" x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} />
+          <text class="tick" x={m.l - 6} y={y(t)} dy="0.32em" text-anchor="end">
+            {t}
+          </text>
+        </g>
+      ))
+    }
+    {
+      rows.map((r, i) => {
+        const x = m.l + i * slot + (slot - bw) / 2;
+        return (
+          <g tabindex="0" data-tip={`${r.year}: ${int(r.count)} uscite, attese ${dec(r.expected, 1)}`}>
+            <rect class="hit" x={m.l + i * slot} width={slot} y={m.t} height={ph} />
+            <path class="bar" d={columnPath(x, bw, y(0), y(r.count))} />
+            <line class="exp" x1={x - 2} x2={x + bw + 2} y1={y(r.expected)} y2={y(r.expected)} />
+            {(Number(r.year) % labelEvery === 0 || rows.length <= 20) && (
+              <text class="tick" x={x + bw / 2} y={H - 10} text-anchor="middle">
+                {r.year}
+              </text>
+            )}
+          </g>
+        );
+      })
+    }
+  </svg></div>
+  <details class="data-table">
+    <summary>Mostra i dati in tabella</summary>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Anno</th><th class="num">Uscite</th><th class="num">Attese per caso</th></tr></thead>
+        <tbody>
+          {
+            rows.map((r) => (
+              <tr>
+                <td>{r.year}</td>
+                <td class="num">{int(r.count)}</td>
+                <td class="num">{dec(r.expected, 1)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>
+
+<style>
+  .viz {
+    margin: 0;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .grid {
+    stroke: var(--grid);
+  }
+  .tick {
+    fill: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .bar {
+    fill: var(--series-1);
+  }
+  .exp {
+    stroke: var(--ink);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .hit {
+    fill: transparent;
+  }
+  g[tabindex]:focus-visible {
+    outline: none;
+  }
+  g[tabindex]:hover .hit,
+  g[tabindex]:focus-visible .hit {
+    fill: var(--band);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+  }
+  .sw {
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .sw.bar {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--series-1);
+  }
+  .sw.exp {
+    width: 16px;
+    height: 2px;
+    background: var(--ink);
+  }
+</style>

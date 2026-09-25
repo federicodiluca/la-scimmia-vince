@@ -1,0 +1,16 @@
+{
+  "name": "La Scimmia Vince",
+  "short_name": "Scimmia",
+  "description": "Statistiche oneste e ironiche sul SuperEnalotto: il caso non ha memoria.",
+  "lang": "it",
+  "start_url": "/la-scimmia-vince/",
+  "scope": "/la-scimmia-vince/",
+  "display": "standalone",
+  "background_color": "#f9f9f7",
+  "theme_color": "#f2c230",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

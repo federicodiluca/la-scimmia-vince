@@ -1,0 +1,23 @@
+---
+import Icon from "../components/Icon.astro";
+import Layout from "../layouts/Layout.astro";
+import { url } from "../lib/format";
+---
+
+<Layout title="Pagina non trovata" description="Questa pagina non esiste.">
+  <div class="nf">
+    <Icon name="banana" size={96} />
+    <h1>Questa pagina è uscita dall'urna</h1>
+    <p class="lead">Anzi, non c'è mai entrata. Prova dalla <a href={url()}>home</a> o dai <a href={url("numeri")}>90 numeri</a>.</p>
+  </div>
+</Layout>
+
+<style>
+  .nf {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .nf .lead {
+    margin: 0 auto;
+  }
+</style>

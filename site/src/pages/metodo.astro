@@ -1,0 +1,94 @@
+---
+import Icon from "../components/Icon.astro";
+import Layout from "../layouts/Layout.astro";
+import { honesty, summary } from "../lib/data";
+import { date, dec, int } from "../lib/format";
+---
+
+<Layout
+  title="Metodo e fonti"
+  description="Da dove vengono i dati di La Scimmia Vince, come vengono aggiornati e quali test statistici usiamo per distinguere il caso da una vera regolarità."
+>
+  <div class="prose">
+    <h1>Metodo e fonti</h1>
+    <p class="lead">
+      La Scimmia Vince è un progetto indipendente e open source. Non vende pronostici, non ha pubblicità di gioco e
+      non guadagna se giochi.
+    </p>
+
+    <h2>I dati</h2>
+    <ul>
+      <li>
+        <strong>Dal 2009 a oggi</strong>: l'<a href="https://www.superenalotto.it/archivio-estrazioni" rel="noopener"
+          >archivio ufficiale</a
+        >, con sestina, jolly, superstar, quote e montepremi.
+      </li>
+      <li>
+        <strong>Dal 1997 al 2008</strong>: l'archivio storico di TuttoSuperenalotto.it. Sul periodo 2009-2022 le due
+        fonti coincidono in tutto tranne un numero di un concorso del 2015: vale quello ufficiale.
+      </li>
+    </ul>
+    <p>
+      I dati vengono aggiornati in automatico la sera di ogni estrazione (martedì, giovedì, venerdì e sabato). Ultimo
+      aggiornamento: concorso del {date(summary.last_draw.date)}. Archivio completo in CSV su
+      <a href="https://github.com/federicodiluca/la-scimmia-vince/tree/main/data/superenalotto">GitHub</a>.
+    </p>
+    <p>
+      Fino a luglio 2009 la sestina non aveva un'estrazione propria: era ricavata dai primi estratti di sei ruote del
+      Lotto. Anche per questo le estrazioni a settimana sono cambiate nel tempo: 2 fino al 2005, poi 3, oggi 4.
+    </p>
+
+    <h2>I test</h2>
+    <h3><Icon name="die" size={22} /> Uniformità</h3>
+    <p>
+      Se l'urna è onesta ogni numero esce in media 1 volta ogni 15 estrazioni. Il test del chi-quadro misura se le
+      differenze tra i numeri sono più grandi di quelle che produce il caso. Oggi: p = {dec(honesty.uniformity.numbers.p_value, 2)}
+      per la sestina, {dec(honesty.uniformity.jolly.p_value, 2)} per il jolly, {dec(honesty.uniformity.superstar.p_value, 2)}
+      per la superstar. Tutto nella norma (servirebbe p sotto 0,05 per sospettare qualcosa).
+    </p>
+    <h3><Icon name="lens" size={22} /> Confronti multipli</h3>
+    <p>
+      Quando si fanno centinaia di confronti ("il 17 il martedì", "il 38 a marzo"…) circa il 5% risulta
+      "significativo" per caso. Correggiamo i p-value con il metodo di Benjamini-Hochberg, che tiene conto di quanti
+      confronti sono stati fatti. La correzione è fatta su <em>tutti</em> i confronti insieme ({int(
+        honesty.fake_discoveries.tests,
+      )} oggi), non gruppo per gruppo: altrimenti basterebbe aggiungere gruppi finché qualcosa passa. Una correlazione è
+      vera solo se sopravvive a questa correzione.
+    </p>
+    <p>
+      Il meteo è quello di Roma, dove si tengono le estrazioni, dall'<a
+        href="https://open-meteo.com/en/docs/historical-weather-api"
+        rel="noopener">archivio storico di Open-Meteo</a
+      >: "pioggia" se cade almeno 1 mm, "sole" se il soleggiamento copre almeno il 70% delle ore di luce, "nuvoloso"
+      altrimenti. La fase lunare è calcolata alle 20:00 di ogni estrazione, divisa in 8 spicchi. Le partite della
+      Nazionale vengono dal dataset aperto <a href="https://github.com/martj42/international_results" rel="noopener"
+        >international_results</a
+      > (licenza CC0).
+    </p>
+    <h3><Icon name="banana" size={22} /> Il simulatore</h3>
+    <p>
+      Una colonna a concorso dal 2009, primo anno con le quote ufficiali. Vincite alle quote reali di ogni concorso per
+      2, 3, 4, 5, 5+1 e 6, al lordo delle tasse. Costo 0,50 € a colonna fino al cambio di regolamento di gennaio 2017, poi 1 €:
+      la data è ricavata dai dati, cioè dal primo concorso che paga il "2". Le strategie usano solo le informazioni
+      disponibili prima di ogni concorso. Le 1.000 scimmie scelgono 6 numeri a caso a ogni concorso.
+    </p>
+    <h3><Icon name="calendar" size={22} /> Ritardi</h3>
+    <p>
+      Per ogni estrazione e ogni numero registriamo il ritardo prima dell'estrazione e se il numero è poi uscito, poi
+      calcoliamo la frequenza di uscita per fascia di ritardo con intervallo di confidenza al 95% (metodo di
+      Clopper-Pearson). Le prime 200 estrazioni sono escluse, perché all'inizio dell'archivio i ritardi sono
+      artificialmente corti.
+    </p>
+    <p>
+      Il codice di tutte le analisi è pubblico: se trovi un errore, <a
+        href="https://github.com/federicodiluca/la-scimmia-vince/issues">apri una segnalazione</a
+      >.
+    </p>
+
+    <h2>Perché una scimmia</h2>
+    <p>
+      Perché una scimmia che sceglie sei numeri a caso ha le stesse probabilità di vincere di chiunque segua un sistema,
+      un ritardatario o un sogno. Alla {int(summary.draws)}ª estrazione come alla prima.
+    </p>
+  </div>
+</Layout>

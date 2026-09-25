@@ -1,0 +1,249 @@
+---
+import Icon from "../components/Icon.astro";
+import Verdict from "../components/Verdict.astro";
+import Layout from "../layouts/Layout.astro";
+import { honesty, summary, type FakeDiscoveries } from "../lib/data";
+import { dec, del, Il, int, url } from "../lib/format";
+
+const MONTHS = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+const SKY: Record<string, string> = { sole: "quando c'è il sole", pioggia: "quando piove", nuvoloso: "quando è nuvoloso" };
+const MATCH: Record<string, string> = {
+  vittoria: "quando l'Italia vince",
+  pareggio: "quando l'Italia pareggia",
+  sconfitta: "quando l'Italia perde",
+  "nessuna partita": "quando l'Italia non gioca",
+};
+const LABELS: Record<string, { title: string; group: (g: string | number) => string }> = {
+  weekday: { title: "Giorno della settimana", group: (g) => `il ${g}` },
+  month: { title: "Mese", group: (g) => `a ${MONTHS[Number(g) - 1]}` },
+  year: { title: "Anno", group: (g) => `nel ${g}` },
+  isoweek: { title: "Settimana dell'anno", group: (g) => `nella settimana ${g}` },
+  meteo: { title: "Meteo a Roma", group: (g) => SKY[String(g)] ?? `con ${g}` },
+  temperatura: {
+    title: "Temperatura massima a Roma",
+    group: (g) => `quando la massima è ${/^(sotto|oltre)/.test(String(g)) ? g : `tra ${g}`}`,
+  },
+  luna: { title: "Fase lunare", group: (g) => `con la ${g}` },
+  nazionale: { title: "Partite della Nazionale", group: (g) => MATCH[String(g)] ?? String(g) },
+};
+const CALENDAR = ["weekday", "month", "year", "isoweek"];
+
+type Family = FakeDiscoveries & { title: string; group: (g: string | number) => string };
+const all = honesty.fake_discoveries;
+const families: Family[] = all.families.map((f) => ({
+  ...f,
+  ...(LABELS[f.by] ?? { title: f.by, group: (g: string | number) => String(g) }),
+}));
+const calendar = families.filter((f) => CALENDAR.includes(f.by));
+const sky = families.filter((f) => !CALENDAR.includes(f.by));
+const weather = sky.find((f) => f.by === "meteo");
+const football = sky.find((f) => f.by === "nazionale");
+const played = football ? Object.entries(football.groups).filter(([g]) => g !== "nessuna partita").reduce((s, [, n]) => s + n, 0) : 0;
+
+// il falso positivo "da manuale": sopravvive alla correzione della sua famiglia, non a quella globale
+const trap = families
+  .flatMap((f) => f.best_fake.filter((b) => b.p_family < f.alpha).map((b) => ({ ...b, f })))
+  .sort((a, b) => a.p_value - b.p_value)[0];
+
+const ratioText = (r: number) => (r >= 1 ? `il ${dec((r - 1) * 100, 0)}% in più` : `il ${dec((1 - r) * 100, 0)}% in meno`);
+---
+
+<Layout
+  ogImage="og/correlazioni.png"
+  title="Correlazioni assurde nel SuperEnalotto: sole, luna e giorni fortunati"
+  description={`Il 17 esce di più il martedì? Con la luna piena? Quando piove a Roma? ${int(all.tests)} confronti sulle estrazioni del SuperEnalotto: ${int(all.naive_discoveries)} "scoperte", ${all.survivors_after_correction} vere.`}
+>
+  <h1>Correlazioni assurde</h1>
+  <p class="lead">
+    "L'81 esce di più il sabato." "Con la luna nuova esce l'85." Frasi così circolano ovunque, e spesso sono
+    <em>vere</em> nei dati. Il problema è un altro: sono inevitabili.
+  </p>
+
+  <h2>Il trucco, spiegato con una moneta</h2>
+  <p class="prose">
+    Lancia una moneta 10 volte: fare almeno 8 teste è raro, succede circa 1 volta su 18. Ma se ripeti l'esperimento
+    100 volte, 5 o 6 volte ci riuscirai. Non è una moneta truccata: hai solo guardato abbastanza. Con i numeri del
+    SuperEnalotto succede lo stesso. Abbiamo confrontato ognuno dei 90 numeri con giorni, mesi, anni, settimane, il
+    meteo di Roma, le fasi lunari e le partite della Nazionale: sono {int(all.tests)} confronti, e circa il 5% sembrerà "significativo" per puro caso.
+  </p>
+
+  <div class="grid grid-3 tiles">
+    <div class="card tile">
+      <div class="label">Confronti fatti</div>
+      <div class="value">{int(all.tests)}</div>
+      <p class="note">numero × calendario, meteo, luna, Nazionale</p>
+    </div>
+    <div class="card tile">
+      <div class="label">"Scoperte" trovate</div>
+      <div class="value">{int(all.naive_discoveries)}</div>
+      <p class="note">Per caso ce ne aspettavamo circa {int(Math.round(all.expected_false_positives))}.</p>
+    </div>
+    <div class="card tile">
+      <div class="label">Scoperte vere</div>
+      <div class="value">{all.survivors_after_correction}</div>
+      <p class="note">dopo la correzione per i confronti multipli (Benjamini-Hochberg)</p>
+    </div>
+  </div>
+
+  <h2><Icon name="calendar" size={30} /> Il calendario</h2>
+  <p class="prose">La correlazione più forte per ogni tipo di confronto. Presa da sola sembra una notizia.</p>
+  <div class="grid grid-2">
+    {
+      calendar.map((f) => {
+        const b = f.best_fake[0]!;
+        return (
+          <article class="card fake">
+            <h3>
+              <a href={url(`numeri/${b.number}`)}>{Il(b.number)}</a> esce {f.group(b.group)} {ratioText(b.ratio)}
+            </h3>
+            <p class="muted">
+              {int(b.count)} uscite contro {dec(b.expected, 1)} attese. Presa da sola: p = {dec(b.p_value, 4)},
+              "significativa". Tenendo conto di tutti i confronti: p = {dec(b.p_adjusted, 2)}, niente.
+            </p>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <h2><Icon name="lens" size={30} /> Cielo, luna e pallone</h2>
+  <p class="prose">
+    Le estrazioni si tengono a Roma, la sera. Abbiamo recuperato il meteo di ogni giorno dal 1997 (archivio storico di
+    <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a>), calcolato la fase della luna alle 20:00 e
+    controllato se quel giorno giocava la Nazionale (<a
+      href="https://github.com/martj42/international_results"
+      rel="noopener">risultati delle nazionali</a
+    >).{played > 0 && <> L'Italia è scesa in campo nel giorno di {int(played)} estrazioni.</>}
+    {
+      weather && (
+        <>
+          C'era il sole in {int(weather.groups["sole"] ?? 0)} estrazioni, pioveva in {int(weather.groups["pioggia"] ?? 0)}.
+        </>
+      )
+    }
+  </p>
+  <div class="grid grid-2">
+    {
+      sky.map((f) => {
+        const b = f.best_fake[0]!;
+        return (
+          <article class="card fake">
+            <p class="kicker">{f.title}</p>
+            <h3>
+              <a href={url(`numeri/${b.number}`)}>{Il(b.number)}</a> esce {f.group(b.group)} {ratioText(b.ratio)}
+            </h3>
+            <p class="muted">
+              {int(b.count)} uscite contro {dec(b.expected, 1)} attese (p = {dec(b.p_value, 4)}). Tenendo conto di tutti i
+              confronti: p = {dec(b.p_adjusted, 2)}.
+            </p>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  {
+    trap && (
+      <section class="card trap">
+        <h2>
+          Il caso {del(trap.number)} {trap.f.group(trap.group)}
+        </h2>
+        <p>
+          Questa sembrava la scoperta del secolo. {Il(trap.number)} è uscito {int(trap.count)} volte {trap.f.group(trap.group)}{" "}
+          contro le {dec(trap.expected, 0)} attese, con p = {dec(trap.p_value, 5)}: una probabilità su{" "}
+          {int(Math.round(1 / trap.p_value))}. E supera perfino la correzione per i confronti multipli, se la si fa solo sui{" "}
+          {int(trap.f.tests)} confronti del gruppo "{trap.f.title.toLowerCase()}".
+        </p>
+        <p>
+          Ma noi di confronti ne abbiamo fatti {int(all.tests)}, e cercando in così tanti posti un evento da 1 su{" "}
+          {int(Math.round(1 / trap.p_value))} diventa quasi scontato. Correggendo su tutti i confronti insieme, come è giusto:
+          p = {dec(trap.p_adjusted, 2)}, nessuna scoperta. È il modo più comune in cui si ingannano anche i ricercatori veri:
+          aggiungere confronti finché qualcosa "funziona".
+        </p>
+      </section>
+    )
+  }
+
+  <h2>Tutti i confronti</h2>
+  <div class="card table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Confronto</th>
+          <th class="num">Test</th>
+          <th class="num">"Scoperte"</th>
+          <th class="num">Attese per caso</th>
+          <th class="num">Vere nel gruppo</th>
+          <th class="num">Vere su tutto</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          families.map((f) => (
+            <tr>
+              <td>{f.title}</td>
+              <td class="num">{int(f.tests)}</td>
+              <td class="num">{int(f.naive_discoveries)}</td>
+              <td class="num">{dec(f.expected_false_positives, 0)}</td>
+              <td class="num">{f.survivors_family}</td>
+              <td class="num">{f.survivors_after_correction}</td>
+            </tr>
+          ))
+        }
+        <tr class="total">
+          <td>Totale</td>
+          <td class="num">{int(all.tests)}</td>
+          <td class="num">{int(all.naive_discoveries)}</td>
+          <td class="num">{dec(all.expected_false_positives, 0)}</td>
+          <td class="num">{all.survivors_family}</td>
+          <td class="num">{all.survivors_after_correction}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong> se qualcuno ti mostra un "numero fortunato del martedì" o "della luna piena",
+      chiedigli quanti altri giorni, lune e numeri ha guardato prima di trovarlo. Su {int(summary.draws)} estrazioni non c'è
+      una sola correlazione che regga.
+    </p>
+  </Verdict>
+
+  <p class="muted">Prossimamente: il Festival di Sanremo. Stesso metodo, stesso finale.</p>
+</Layout>
+
+<style>
+  .tiles {
+    margin: 24px 0;
+  }
+  h2 :global(.icon) {
+    margin-right: 6px;
+    vertical-align: -4px;
+  }
+  .fake h3 {
+    margin-top: 0;
+  }
+  .fake p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .kicker {
+    color: var(--ink-2);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px !important;
+  }
+  .trap {
+    margin-top: 32px;
+    border-left: 6px solid var(--banana);
+  }
+  .trap h2 {
+    margin-top: 0;
+  }
+  .total td {
+    font-weight: 700;
+  }
+</style>

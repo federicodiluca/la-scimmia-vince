@@ -1,0 +1,81 @@
+---
+import DrawBalls from "../../components/DrawBalls.astro";
+import Layout from "../../layouts/Layout.astro";
+import { drawPath, drawsOfYear, frequency, years } from "../../lib/data";
+import { date, url, weekday } from "../../lib/format";
+
+export function getStaticPaths() {
+  return years.map((y) => ({ params: { anno: String(y) } }));
+}
+
+const year = Number(Astro.params.anno);
+const list = [...drawsOfYear(year)].reverse();
+const counts = Object.entries(frequency.by_year[String(year)] ?? {})
+  .map(([n, c]) => ({ n: Number(n), c }))
+  .sort((a, b) => b.c - a.c || a.n - b.n);
+const idx = years.indexOf(year);
+const prev = years[idx - 1];
+const next = years[idx + 1];
+---
+
+<Layout
+  title={`Estrazioni SuperEnalotto ${year}: tutti i risultati`}
+  description={`Tutte le ${list.length} estrazioni del SuperEnalotto del ${year}: sestina vincente, jolly e superstar di ogni concorso, e i numeri più usciti dell'anno.`}
+>
+  <nav class="crumbs" aria-label="Percorso"><a href={url("estrazioni")}>Archivio</a> › {year}</nav>
+  <h1>Estrazioni {year}</h1>
+  <p class="lead">
+    {list.length} concorsi. I più usciti dell'anno:
+    {counts.slice(0, 3).map((x, i) => <>{i > 0 && ", "}<a href={url(`numeri/${x.n}`)}>{x.n}</a> ({x.c})</>)}. Il
+    prossimo anno saranno altri, e nessuno se ne ricorderà.
+  </p>
+
+  <div class="card table-scroll">
+    <table>
+      <thead>
+        <tr><th>Concorso</th><th>Data</th><th>Numeri · <span class="muted">jolly · superstar</span></th></tr>
+      </thead>
+      <tbody>
+        {
+          list.map((d) => (
+            <tr>
+              <td class="num">{Number(d.id.split("-")[1])}</td>
+              <td>
+                <a class="nowrap" href={url(drawPath(d))}>{date(d.date)}</a>
+                <br />
+                <small class="muted">{weekday(d.date)}</small>
+              </td>
+              <td>
+                <DrawBalls draw={d} small />
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <nav class="pager" aria-label="Altri anni">
+    {prev ? <a href={url(`estrazioni/${prev}`)}>← {prev}</a> : <span></span>}
+    {next ? <a href={url(`estrazioni/${next}`)}>{next} →</a> : <span></span>}
+  </nav>
+</Layout>
+
+<style>
+  .crumbs {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+  td {
+    vertical-align: middle;
+  }
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+  }
+</style>

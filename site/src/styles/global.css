@@ -1,0 +1,300 @@
+/* ---- token ---------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f2f1ec;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #6f6d68;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+
+  --brand: #1d5c3a;          /* verde giungla: link e accenti testuali */
+  --banana: #f2c230;         /* solo superfici e marchi, mai testo su chiaro */
+  --banana-ink: #3d2f00;
+  --fur: #7a4a2a;
+
+  --series-1: #2a78d6;       /* dataviz: slot 1 (blu) */
+  --series-muted: #cfcdc4;   /* neutro: "dentro la norma", il colore resta a chi esce dalla fascia */
+  --neg: #e34948;            /* polo caldo del divergente */
+  --band: #ecebe5;           /* fascia del caso */
+
+  --radius: 14px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --maxw: 1080px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #242422;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #9a9890;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --brand: #6fcf97;
+    --series-1: #3987e5;
+    --series-muted: #54534e;
+    --neg: #e66767;
+    --band: #2e2e2b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #242422;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --muted: #9a9890;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --brand: #6fcf97;
+  --series-1: #3987e5;
+  --series-muted: #54534e;
+  --neg: #e66767;
+  --band: #2e2e2b;
+}
+
+/* ---- base ----------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.6;
+}
+img,
+svg {
+  max-width: 100%;
+}
+a {
+  color: var(--brand);
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+:focus-visible {
+  outline: 3px solid var(--series-1);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+}
+h2 {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 750;
+  margin: 2.5rem 0 0.75rem;
+}
+h3 {
+  font-size: 1.15rem;
+  margin: 1.5rem 0 0.5rem;
+}
+p {
+  margin: 0 0 1rem;
+}
+.lead {
+  font-size: 1.2rem;
+  color: var(--ink-2);
+  max-width: 62ch;
+}
+.muted {
+  color: var(--muted);
+}
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.prose {
+  max-width: 68ch;
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- card, griglie -------------------------------------------------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.grid {
+  display: grid;
+  gap: 16px;
+}
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* ---- stat tile ------------------------------------------------------ */
+.tile .label {
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+.tile .value {
+  font-size: 2.2rem;
+  font-weight: 650;
+  line-height: 1.15;
+  margin: 4px 0;
+}
+.tile .note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ---- palline -------------------------------------------------------- */
+.balls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.ball {
+  display: inline-grid;
+  place-items: center;
+  width: 2.6em;
+  height: 2.6em;
+  border-radius: 50%;
+  background: var(--banana);
+  color: var(--banana-ink);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+}
+a.ball:hover {
+  outline: 2px solid var(--ink);
+}
+.ball.jolly {
+  background: var(--surface-2);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--axis);
+}
+.ball.star {
+  background: var(--fur);
+  color: #fff;
+}
+.ball.sm {
+  width: 2em;
+  height: 2em;
+  font-size: 0.9rem;
+}
+
+/* ---- tabelle -------------------------------------------------------- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.95rem;
+}
+th,
+td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--grid);
+}
+th {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+details.data-table {
+  margin-top: 12px;
+}
+details.data-table summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+
+/* ---- callout "verdetto della scimmia" ------------------------------- */
+.verdict {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 16px 0;
+}
+.verdict svg {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+.verdict p:last-child {
+  margin: 0;
+}
+
+/* ---- tooltip dei grafici ------------------------------------------- */
+.viz-tip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--page);
+  font-size: 0.85rem;
+  line-height: 1.35;
+  padding: 6px 10px;
+  border-radius: 8px;
+  max-width: 260px;
+  opacity: 0;
+  transition: opacity 0.08s;
+}
+.viz-tip.on {
+  opacity: 1;
+}
+
+/* ---- grafici su schermi stretti: scorre il grafico, non la pagina --- */
+.chart-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.chart-scroll > svg {
+  min-width: 640px;
+}
+.grid-2 {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 680px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

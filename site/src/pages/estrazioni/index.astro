@@ -1,0 +1,63 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { drawsOfYear, summary, years } from "../../lib/data";
+import { date, int, url } from "../../lib/format";
+
+const rows = [...years].reverse().map((y) => {
+  const list = drawsOfYear(y);
+  return { year: y, count: list.length, first: list[0]!.date, last: list.at(-1)!.date };
+});
+---
+
+<Layout
+  title="Archivio estrazioni SuperEnalotto dal 1997"
+  description={`Tutte le ${int(summary.draws)} estrazioni del SuperEnalotto dal ${date(summary.first_date)} a oggi, anno per anno: sestina, jolly e superstar.`}
+>
+  <h1>Archivio estrazioni</h1>
+  <p class="lead">
+    Tutte le {int(summary.draws)} estrazioni dal primo concorso del {date(summary.first_date)}. Scegli un anno.
+  </p>
+  <ul class="years">
+    {
+      rows.map((r) => (
+        <li>
+          <a class="card" href={url(`estrazioni/${r.year}`)}>
+            <strong>{r.year}</strong>
+            <span class="muted tabular">{int(r.count)} estrazioni</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="muted">
+    Dal 1997 al 2008 le estrazioni vengono dall'archivio storico di TuttoSuperenalotto.it, dal 2009 dall'archivio
+    ufficiale. <a href={url("metodo")}>Dettagli sulle fonti.</a>
+  </p>
+</Layout>
+
+<style>
+  .years {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 24px 0;
+  }
+  .years a {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .years a:hover {
+    border-color: var(--banana);
+  }
+  .years strong {
+    font-size: 1.3rem;
+  }
+  .years span {
+    font-size: 0.9rem;
+  }
+</style>
