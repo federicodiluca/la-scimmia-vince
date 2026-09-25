@@ -13,6 +13,7 @@ import { date, dec, int, url } from "../lib/format";
       "Tutte le estrazioni del SuperEnalotto dal 3 dicembre 1997 (sestina, jolly, superstar) e, dal 2009, quote, vincitori e montepremi di ogni concorso, in CSV, aggiornati dopo ogni estrazione.",
     url: new URL(url("metodo"), Astro.site).href,
     isAccessibleForFree: true,
+    license: "https://creativecommons.org/licenses/by/4.0/",
     inLanguage: "it-IT",
     temporalCoverage: `${summary.first_date}/${summary.last_draw.date}`,
     creator: { "@type": "Person", name: "Federico Di Luca", url: "https://federicodiluca.github.io/" },
@@ -100,7 +101,9 @@ import { date, dec, int, url } from "../lib/format";
     <p>
       Il codice di tutte le analisi è pubblico: se trovi un errore, <a
         href="https://github.com/federicodiluca/la-scimmia-vince/issues">apri una segnalazione</a
-      >.
+      >. Il codice è rilasciato con licenza MIT, i dati con licenza
+      <a href="https://creativecommons.org/licenses/by/4.0/deed.it" rel="license">CC BY 4.0</a>: puoi riusarli
+      citando la fonte.
     </p>
 
     <h2>Chi c'è dietro</h2>

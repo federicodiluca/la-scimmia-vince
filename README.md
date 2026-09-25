@@ -99,6 +99,13 @@ sestina, sempre 1-2-3-4-5-6) contro 1.000 scimmie che giocano a caso, con le quo
 - [ ] Poi: Sanremo
 - [ ] Fase 4: Lotto (bot Telegram in stand-by)
 
+## Licenza
+
+- **Codice**: [MIT](LICENSE)
+- **Dati** (`data/`): [CC BY 4.0](data/LICENSE.md). Puoi riusarli citando la fonte. Le singole fonti (risultati
+  ufficiali, Open-Meteo, international_results) restano dei rispettivi titolari: i dettagli sono in
+  [data/LICENSE.md](data/LICENSE.md).
+
 ---
 
 Il gioco può causare dipendenza patologica. Questo progetto non invita a giocare, anzi.
