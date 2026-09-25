@@ -13,7 +13,7 @@ class Draw:
     """Una estrazione del SuperEnalotto.
 
     `contest` è il numero di concorso, che riparte da 1 ogni anno.
-    `superstar` è None prima della sua introduzione (fine 2006).
+    `superstar` è None prima della sua introduzione (marzo 2006).
     """
 
     date: date

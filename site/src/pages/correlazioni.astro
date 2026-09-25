@@ -50,7 +50,7 @@ const ratioText = (r: number) => (r >= 1 ? `il ${dec((r - 1) * 100, 0)}% in più
 
 <Layout
   ogImage="og/correlazioni.png"
-  title="Correlazioni assurde nel SuperEnalotto: sole, luna e giorni fortunati"
+  title="Correlazioni assurde: sole, luna e SuperEnalotto"
   description={`Il 17 esce di più il martedì? Con la luna piena? Quando piove a Roma? ${int(all.tests)} confronti sulle estrazioni del SuperEnalotto: ${int(all.naive_discoveries)} "scoperte", ${all.survivors_after_correction} vere.`}
 >
   <h1>Correlazioni assurde</h1>
@@ -85,7 +85,7 @@ const ratioText = (r: number) => (r >= 1 ? `il ${dec((r - 1) * 100, 0)}% in più
     </div>
   </div>
 
-  <h2><Icon name="calendar" size={30} /> Il calendario</h2>
+  <h2><Icon name="clock" size={30} /> Il calendario</h2>
   <p class="prose">La correlazione più forte per ogni tipo di confronto. Presa da sola sembra una notizia.</p>
   <div class="grid grid-2">
     {

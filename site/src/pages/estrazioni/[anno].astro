@@ -1,4 +1,5 @@
 ---
+import Icon from "../../components/Icon.astro";
 import DrawBalls from "../../components/DrawBalls.astro";
 import Layout from "../../layouts/Layout.astro";
 import { drawPath, drawsOfYear, frequency, years } from "../../lib/data";
@@ -19,7 +20,7 @@ const next = years[idx + 1];
 ---
 
 <Layout
-  title={`Estrazioni SuperEnalotto ${year}: tutti i risultati`}
+  title={`SuperEnalotto ${year}: tutte le estrazioni`}
   description={`Tutte le ${list.length} estrazioni del SuperEnalotto del ${year}: sestina vincente, jolly e superstar di ogni concorso, e i numeri più usciti dell'anno.`}
 >
   <nav class="crumbs" aria-label="Percorso"><a href={url("estrazioni")}>Archivio</a> › {year}</nav>
@@ -56,8 +57,8 @@ const next = years[idx + 1];
   </div>
 
   <nav class="pager" aria-label="Altri anni">
-    {prev ? <a href={url(`estrazioni/${prev}`)}>← {prev}</a> : <span></span>}
-    {next ? <a href={url(`estrazioni/${next}`)}>{next} →</a> : <span></span>}
+    {prev ? <a href={url(`estrazioni/${prev}`)}><Icon name="tail" size={20} flip /> {prev}</a> : <span></span>}
+    {next ? <a href={url(`estrazioni/${next}`)}>{next} <Icon name="tail" size={20} /></a> : <span></span>}
   </nav>
 </Layout>
 

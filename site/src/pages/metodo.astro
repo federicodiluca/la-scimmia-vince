@@ -2,10 +2,26 @@
 import Icon from "../components/Icon.astro";
 import Layout from "../layouts/Layout.astro";
 import { honesty, summary } from "../lib/data";
-import { date, dec, int } from "../lib/format";
+import { date, dec, int, url } from "../lib/format";
 ---
 
 <Layout
+  jsonLd={{
+    "@type": "Dataset",
+    name: "Estrazioni del SuperEnalotto dal 1997 con quote e montepremi",
+    description:
+      "Tutte le estrazioni del SuperEnalotto dal 3 dicembre 1997 (sestina, jolly, superstar) e, dal 2009, quote, vincitori e montepremi di ogni concorso, in CSV, aggiornati dopo ogni estrazione.",
+    url: new URL(url("metodo"), Astro.site).href,
+    isAccessibleForFree: true,
+    inLanguage: "it-IT",
+    temporalCoverage: `${summary.first_date}/${summary.last_draw.date}`,
+    creator: { "@type": "Person", name: "Federico Di Luca", url: "https://federicodiluca.github.io/" },
+    distribution: ["draws", "prizes", "pools"].map((f) => ({
+      "@type": "DataDownload",
+      encodingFormat: "text/csv",
+      contentUrl: `https://raw.githubusercontent.com/federicodiluca/la-scimmia-vince/main/data/superenalotto/${f}.csv`,
+    })),
+  }}
   title="Metodo e fonti"
   description="Da dove vengono i dati di La Scimmia Vince, come vengono aggiornati e quali test statistici usiamo per distinguere il caso da una vera regolarità."
 >
@@ -34,12 +50,14 @@ import { date, dec, int } from "../lib/format";
       <a href="https://github.com/federicodiluca/la-scimmia-vince/tree/main/data/superenalotto">GitHub</a>.
     </p>
     <p>
-      Fino a luglio 2009 la sestina non aveva un'estrazione propria: era ricavata dai primi estratti di sei ruote del
-      Lotto. Anche per questo le estrazioni a settimana sono cambiate nel tempo: 2 fino al 2005, poi 3, oggi 4.
+      Fino al concorso del 2 luglio 2009 il SuperEnalotto non aveva un'estrazione propria: la sestina era formata dai
+      primi estratti delle ruote di Bari, Firenze, Milano, Napoli, Palermo e Roma del Lotto, il jolly dal primo
+      estratto di Venezia e la superstar da quello della ruota Nazionale. Anche il calendario è cambiato: 2 estrazioni a settimana fino al 2004, 3 dal 2005, 4 da luglio 2023. La
+      superstar esiste da marzo 2006.
     </p>
 
     <h2>I test</h2>
-    <h3><Icon name="die" size={22} /> Uniformità</h3>
+    <h3><Icon name="ball" size={22} /> Uniformità</h3>
     <p>
       Se l'urna è onesta ogni numero esce in media 1 volta ogni 15 estrazioni. Il test del chi-quadro misura se le
       differenze tra i numeri sono più grandi di quelle che produce il caso. Oggi: p = {dec(honesty.uniformity.numbers.p_value, 2)}
@@ -72,7 +90,7 @@ import { date, dec, int } from "../lib/format";
       la data è ricavata dai dati, cioè dal primo concorso che paga il "2". Le strategie usano solo le informazioni
       disponibili prima di ogni concorso. Le 1.000 scimmie scelgono 6 numeri a caso a ogni concorso.
     </p>
-    <h3><Icon name="calendar" size={22} /> Ritardi</h3>
+    <h3><Icon name="clock" size={22} /> Ritardi</h3>
     <p>
       Per ogni estrazione e ogni numero registriamo il ritardo prima dell'estrazione e se il numero è poi uscito, poi
       calcoliamo la frequenza di uscita per fascia di ritardo con intervallo di confidenza al 95% (metodo di
@@ -83,6 +101,16 @@ import { date, dec, int } from "../lib/format";
       Il codice di tutte le analisi è pubblico: se trovi un errore, <a
         href="https://github.com/federicodiluca/la-scimmia-vince/issues">apri una segnalazione</a
       >.
+    </p>
+
+    <h2>Chi c'è dietro</h2>
+    <p>
+      La Scimmia Vince è un progetto di <a href="https://federicodiluca.github.io/" rel="author">Federico Di Luca</a>,
+      insegnante di informatica e sviluppatore. È nato per curiosità, per vedere dove portano trent'anni di estrazioni
+      quando li si guarda con un po' di statistica, ed è cresciuto con un obiettivo: raccontare i numeri del gioco senza
+      venderli. Codice, dati e analisi sono pubblici su
+      <a href="https://github.com/federicodiluca/la-scimmia-vince">GitHub</a>. Gli altri suoi progetti sono
+      <a href="https://federicodiluca.github.io/progetti/">qui</a>.
     </p>
 
     <h2>Perché una scimmia</h2>

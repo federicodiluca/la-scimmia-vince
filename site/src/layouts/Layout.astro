@@ -11,11 +11,26 @@ interface Props {
   jsonLd?: Record<string, unknown>;
   /** card Open Graph, relativa al sito (es. "og/numeri/17.png") */
   ogImage?: string;
+  /** pagine da non indicizzare (es. la 404) */
+  noindex?: boolean;
 }
 
-const { title, description, jsonLd, ogImage: og = "og/home.png" } = Astro.props;
+const { title, description, jsonLd, ogImage: og = "og/home.png", noindex = false } = Astro.props;
 const SITE_NAME = "La Scimmia Vince";
-const fullTitle = title === SITE_NAME ? `${SITE_NAME} · il caso non ha memoria` : `${title} · ${SITE_NAME}`;
+const AUTHOR = {
+  "@type": "Person",
+  name: "Federico Di Luca",
+  url: "https://federicodiluca.github.io/",
+  sameAs: ["https://github.com/federicodiluca"],
+};
+// Google tronca oltre ~65 caratteri e mostra comunque il nome del sito: il suffisso solo se c'è spazio
+const suffix = ` · ${SITE_NAME}`;
+const fullTitle =
+  title === SITE_NAME
+    ? `${SITE_NAME} · il caso non ha memoria`
+    : title.length + suffix.length <= 65
+      ? `${title}${suffix}`
+      : title;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL(url(og), Astro.site).href;
 const path = Astro.url.pathname;
@@ -37,6 +52,8 @@ const graph = [
     url: new URL(url(), Astro.site).href,
     inLanguage: "it-IT",
     description: "Statistiche oneste e ironiche sulle estrazioni del SuperEnalotto dal 1997 a oggi.",
+    author: AUTHOR,
+    creator: AUTHOR,
   },
   ...(jsonLd ? [{ "@context": "https://schema.org", ...jsonLd }] : []),
 ];
@@ -49,6 +66,8 @@ const graph = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="author" content="Federico Di Luca" />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={url("favicon.svg")} type="image/svg+xml" />
     <link rel="icon" href={url("icons/icon-32.png")} sizes="32x32" type="image/png" />
@@ -99,9 +118,8 @@ const graph = [
           </ul>
         </nav>
         <button class="theme" type="button" aria-label="Cambia tema chiaro/scuro" title="Tema chiaro/scuro">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z" fill="currentColor"></path>
-          </svg>
+          <Icon name="moon" size={22} class="to-dark" />
+          <Icon name="sun" size={24} class="to-light" />
         </button>
       </div>
     </header>
@@ -121,13 +139,17 @@ const graph = [
           <strong>Il gioco è vietato ai minori e può causare dipendenza patologica.</strong>{" "}
           Questo sito non vende giocate e non ha legami con operatori di gioco. Se il gioco sta diventando un
           problema: Telefono Verde Nazionale dell'Istituto Superiore di Sanità{" "}
-          <a href="tel:800558822">800 558822</a> (anonimo e gratuito).
+          <a href="tel:800558822">800 55 88 22</a>, anonimo e gratuito, dal lunedì al venerdì dalle 10 alle 16.
         </p>
-        <p class="muted">
-          Progetto indipendente e open source · <a href="https://github.com/federicodiluca/la-scimmia-vince"
-            >codice e dati su GitHub</a
-          > · SuperEnalotto è un marchio registrato dei rispettivi titolari.
+        <p class="credits">
+          <Icon name="monkey" size={28} />
+          <span>
+            Un progetto di <a href="https://federicodiluca.github.io/" rel="author">Federico Di Luca</a>, indipendente e open
+            source · <a href="https://federicodiluca.github.io/progetti/">guarda i miei altri progetti</a> ·{" "}
+            <a href="https://github.com/federicodiluca/la-scimmia-vince">codice e dati su GitHub</a>
+          </span>
         </p>
+        <p class="muted">SuperEnalotto è un marchio registrato dei rispettivi titolari.</p>
       </div>
     </footer>
 
@@ -238,6 +260,23 @@ const graph = [
     text-decoration-thickness: 3px;
     text-underline-offset: 6px;
   }
+  .theme :global(.to-light) {
+    display: none;
+  }
+  :global(:root[data-theme="dark"]) .theme :global(.to-light) {
+    display: inline-block;
+  }
+  :global(:root[data-theme="dark"]) .theme :global(.to-dark) {
+    display: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) .theme :global(.to-light) {
+      display: inline-block;
+    }
+    :global(:root:not([data-theme="light"])) .theme :global(.to-dark) {
+      display: none;
+    }
+  }
   .theme {
     background: none;
     border: 1px solid var(--border);
@@ -270,5 +309,11 @@ const graph = [
   }
   .responsible {
     max-width: 80ch;
+  }
+  .credits {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-2);
   }
 </style>

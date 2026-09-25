@@ -298,3 +298,21 @@ details.data-table summary {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ---- <details>: niente triangolino di sistema, al suo posto la nostra icona ---- */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details > summary .icon {
+  transition: transform 0.15s;
+  vertical-align: -2px;
+}
+details[open] > summary .icon {
+  transform: rotate(90deg);
+}
+.pager a .icon {
+  vertical-align: -4px;
+}

@@ -65,7 +65,7 @@ def cmd_stats(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="scimmia", description="La Scimmia Vince 🐒")
+    parser = argparse.ArgumentParser(prog="scimmia", description="La Scimmia Vince: statistiche oneste sul SuperEnalotto")
     parser.add_argument("-v", "--verbose", action="store_true")
     sub = parser.add_subparsers(dest="command", required=True)
 

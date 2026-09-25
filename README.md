@@ -1,4 +1,6 @@
-# La Scimmia Vince 🐒
+<img src="site/public/favicon.svg" alt="" width="72" align="right">
+
+# La Scimmia Vince
 
 Statistiche **oneste** (e un po' ironiche) sulle estrazioni del SuperEnalotto dal 1997 a oggi.
 
@@ -34,7 +36,7 @@ Una GitHub Action (`.github/workflows/update-data.yml`) scarica le nuove estrazi
 concorso (mar, gio, ven, sab) e fa il commit dei dati.
 
 > Fino al 2009 la sestina era ricavata dai primi estratti di sei ruote del Lotto; dal luglio 2009 il
-> SuperEnalotto ha un'estrazione propria. La superstar esiste dalla fine del 2006.
+> SuperEnalotto ha un'estrazione propria. La superstar esiste da marzo 2006.
 
 ## Uso
 

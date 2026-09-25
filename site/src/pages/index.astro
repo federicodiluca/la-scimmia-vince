@@ -22,8 +22,8 @@ const jackpot = summary.jackpot;
 
 const sections = [
   { href: url("se-avessi-giocato"), icon: "banana", title: "Se avessi giocato…", text: "Ritardatari, numeri caldi, sempre gli stessi: quanto avresti vinto dal 2009 con le quote vere? E con i tuoi numeri?" },
-  { href: url("numeri"), icon: "die", title: "I 90 numeri", text: "Uscite, ritardi e compagni di sestina di ogni numero. Con il confronto che gli altri non fanno: quanto ci si aspettava per caso." },
-  { href: url("ritardatari"), icon: "calendar", title: "Il mito del ritardatario", text: "Un numero che non esce da 100 estrazioni è \"maturo\"? Lo abbiamo verificato su tutte le estrazioni." },
+  { href: url("numeri"), icon: "ball", title: "I 90 numeri", text: "Uscite, ritardi e compagni di sestina di ogni numero. Con il confronto che gli altri non fanno: quanto ci si aspettava per caso." },
+  { href: url("ritardatari"), icon: "clock", title: "Il mito del ritardatario", text: "Un numero che non esce da 100 estrazioni è \"maturo\"? Lo abbiamo verificato su tutte le estrazioni." },
   { href: url("correlazioni"), icon: "lens", title: "Correlazioni assurde", text: "Il 17 esce di più il martedì? A cercare bene si trova sempre qualcosa. Ecco perché non conta." },
 ] as const;
 ---
@@ -78,7 +78,7 @@ const sections = [
     </div>
     <div class="card tile">
       <div class="label">"Scoperte" tipo "l'81 esce di più il sabato"</div>
-      <div class="value">{int(naive)} → {survivors}</div>
+      <div class="value">{int(naive)} <Icon name="tail" size={30} label="diventano" /> {survivors}</div>
       <p class="note">
         Su {int(tests)} confronti ce ne aspettavamo {int(Math.round(expectedFakes))} per caso. Dopo la verifica statistica{" "}
         {survivors === 0 ? "non ne resta nessuna" : survivors === 1 ? "ne resta una" : `ne restano ${survivors}`}.

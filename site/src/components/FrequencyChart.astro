@@ -1,4 +1,5 @@
 ---
+import Icon from "./Icon.astro";
 // Scarto di ogni numero dal numero di uscite atteso, con la fascia che il puro caso
 // produce nel 95% dei casi. Colore solo per chi ne esce: dentro la fascia è rumore.
 import type { Band } from "../lib/data";
@@ -88,7 +89,7 @@ const sign = (v: number) => (v > 0 ? `+${dec(v, 0)}` : dec(v, 0));
     }
   </svg></div>
   <details class="data-table">
-    <summary>Mostra i dati in tabella</summary>
+    <summary><Icon name="chevron" size={16} /> Mostra i dati in tabella</summary>
     <div class="table-scroll">
       <table>
         <thead>

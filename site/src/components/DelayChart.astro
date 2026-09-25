@@ -1,4 +1,5 @@
 ---
+import Icon from "./Icon.astro";
 // Quanto spesso esce un numero in funzione del suo ritardo: punto = frequenza osservata,
 // baffi = intervallo di confidenza al 95%, linea = 1/15 (quello che dice il caso).
 import type { DelayBucket } from "../lib/data";
@@ -60,7 +61,7 @@ const expected = buckets[0]?.expected ?? 6 / 90;
     <text class="axis-title" x={m.l + pw / 2} y={H - 4} text-anchor="middle">ritardo (estrazioni senza uscire)</text>
   </svg></div>
   <details class="data-table">
-    <summary>Mostra i dati in tabella</summary>
+    <summary><Icon name="chevron" size={16} /> Mostra i dati in tabella</summary>
     <div class="table-scroll">
       <table>
         <thead>

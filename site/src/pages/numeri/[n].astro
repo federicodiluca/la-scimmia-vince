@@ -28,7 +28,7 @@ const description = `Il numero ${n} al SuperEnalotto: uscito ${int(s.count)} vol
 
 <Layout
   ogImage={`og/numeri/${n}.png`}
-  title={`Numero ${n} al SuperEnalotto: uscite, ritardo e statistiche`}
+  title={`Numero ${n} al SuperEnalotto: uscite e ritardo`}
   description={description}
   jsonLd={{
     "@type": "BreadcrumbList",
@@ -71,14 +71,14 @@ const description = `Il numero ${n} al SuperEnalotto: uscito ${int(s.count)} vol
     <div class="card tile">
       <div class="label">Come jolly e superstar</div>
       <div class="value">{int(s.jolly)} · {int(s.superstar)}</div>
-      <p class="note">volte jolly · volte superstar (da quando esiste, fine 2006).</p>
+      <p class="note">volte jolly · volte superstar (da marzo 2006).</p>
     </div>
   </div>
 
   <h2>Anno per anno</h2>
   <p class="prose">
     Le barre sono le uscite {del(n)}, le lineette quanto ci si aspettava per caso in quell'anno. L'atteso cambia perché
-    sono cambiate le estrazioni a settimana: 2 fino al 2005, poi 3, oggi 4. Gli anni "d'oro" e quelli "neri" si
+    sono cambiate le estrazioni a settimana: 2 fino al 2004, 3 dal 2005, 4 da luglio 2023. Gli anni "d'oro" e quelli "neri" si
     alternano senza alcuno schema.
   </p>
   <div class="card"><YearChart number={n} byYear={s.by_year} drawsPerYear={perYear} /></div>
@@ -111,9 +111,9 @@ const description = `Il numero ${n} al SuperEnalotto: uscito ${int(s.count)} vol
   </Verdict>
 
   <nav class="pager" aria-label="Altri numeri">
-    <a href={url(`numeri/${prev}`)}>← {Il(prev)}</a>
-    <a href={url("numeri")}><Icon name="die" size={20} /> Tutti i numeri</a>
-    <a href={url(`numeri/${next}`)}>{Il(next)} →</a>
+    <a href={url(`numeri/${prev}`)}><Icon name="tail" size={20} flip /> {Il(prev)}</a>
+    <a href={url("numeri")}><Icon name="ball" size={20} /> Tutti i numeri</a>
+    <a href={url(`numeri/${next}`)}>{Il(next)} <Icon name="tail" size={20} /></a>
   </nav>
 </Layout>
 

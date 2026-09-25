@@ -1,6 +1,7 @@
 ---
+import Icon from "./Icon.astro";
 // Uscite di un numero anno per anno, con il valore atteso per caso (che cambia con
-// il numero di estrazioni dell'anno: 2 a settimana fino al 2005, poi 3, poi 4).
+// il numero di estrazioni dell'anno: 2 a settimana fino al 2004, 3 dal 2005, 4 da luglio 2023).
 import { dec, del, int } from "../lib/format";
 import { columnPath, niceStep } from "../lib/svg";
 
@@ -69,7 +70,7 @@ const labelEvery = rows.length > 20 ? 5 : 1;
     }
   </svg></div>
   <details class="data-table">
-    <summary>Mostra i dati in tabella</summary>
+    <summary><Icon name="chevron" size={16} /> Mostra i dati in tabella</summary>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Anno</th><th class="num">Uscite</th><th class="num">Attese per caso</th></tr></thead>

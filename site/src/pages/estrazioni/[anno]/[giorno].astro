@@ -120,17 +120,17 @@ const description = `Numeri vincenti del SuperEnalotto di ${when} (concorso ${co
   <h2>Curiosità (oneste)</h2>
   <ul class="facts">
     <li>
-      <Icon name="calendar" size={24} />
+      <Icon name="clock" size={24} />
       <span>
-        Il più "atteso" era {il(longest.n)}: non usciva da {int(longest.d)} estrazioni.{" "}
-        {`Il più "fresco" ${il(freshest.n)}, ${freshest.d === 0 ? "uscito anche nel concorso precedente" : `uscito ${int(freshest.d)} estrazioni prima`}.`}{" "}
+        Il più "atteso" era {il(longest.n)}: mancava da {int(longest.d)} {longest.d === 1 ? "estrazione" : "estrazioni"}.{" "}
+        {`Il più "fresco" ${il(freshest.n)}, ${freshest.d === 0 ? "uscito anche nel concorso precedente" : `assente solo da ${int(freshest.d)} ${freshest.d === 1 ? "estrazione" : "estrazioni"}`}.`}{" "}
         Né l'uno né l'altro aveva più probabilità degli altri: <a href={url("ritardatari")}>il ritardo non conta</a>.
       </span>
     </li>
     <li>
-      <Icon name="die" size={24} />
+      <Icon name="ball" size={24} />
       <span>
-        Somma dei numeri: {sum} (in media una sestina somma 273). Pari: {even} su 6.{" "}
+        Somma dei numeri: {sum} (la somma attesa è 273). Pari: {even} su 6.{" "}
         {consecutive > 0 ? `Contiene ${consecutive === 1 ? "una coppia" : `${consecutive} coppie`} di numeri consecutivi, cosa che capita in circa 3 estrazioni su 10.` : "Nessun numero consecutivo."}
       </span>
     </li>
@@ -151,9 +151,9 @@ const description = `Numeri vincenti del SuperEnalotto di ${when} (concorso ${co
   </Verdict>
 
   <nav class="pager" aria-label="Altre estrazioni">
-    {prev ? <a href={url(drawPath(prev))}>← {date(prev.date)}</a> : <span />}
+    {prev ? <a href={url(drawPath(prev))}><Icon name="tail" size={20} flip /> {date(prev.date)}</a> : <span />}
     <a href={url(`estrazioni/${draw.date.slice(0, 4)}`)}>Tutto il {draw.date.slice(0, 4)}</a>
-    {next ? <a href={url(drawPath(next))}>{date(next.date)} →</a> : <span />}
+    {next ? <a href={url(drawPath(next))}>{date(next.date)} <Icon name="tail" size={20} /></a> : <span />}
   </nav>
 </Layout>
 
