@@ -56,7 +56,7 @@ uv run pytest                    # test
 ## Sito
 
 Il sito è in `site/` ([Astro](https://astro.build), tutto statico) ed è pubblicato su
-<https://federicodiluca.github.io/la-scimmia-vince/>. Le pagine (home, 90 schede numero, archivio per anno,
+<https://lascimmiavince.federicodiluca.com/>. Le pagine (home, 90 schede numero, archivio per anno,
 ritardatari, correlazioni, metodo) si generano dai JSON prodotti da `scimmia stats`. I grafici sono SVG generati
 in fase di build: si leggono anche senza JavaScript e hanno sempre una tabella dati accanto.
 
@@ -66,7 +66,7 @@ Serve Node ≥ 22.12 (vedi `site/.nvmrc`).
 uv run scimmia stats --out site/src/data/generated   # dati per il sito
 cd site
 npm ci
-npm run dev                                           # http://localhost:4321/la-scimmia-vince/
+npm run dev                                           # http://localhost:4321/
 npm run build                                         # icone PNG + sito statico in site/dist
 ```
 

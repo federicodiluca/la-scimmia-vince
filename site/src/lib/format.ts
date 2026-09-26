@@ -25,7 +25,7 @@ export const Il = (n: number) => (elides(n) ? `L'${n}` : `Il ${n}`);
 export const del = (n: number) => (elides(n) ? `dell'${n}` : `del ${n}`);
 export const al = (n: number) => (elides(n) ? `all'${n}` : `al ${n}`);
 
-/** Link interno che rispetta il `base` di GitHub Pages. */
+/** Link interno che rispetta il `base` di Astro. */
 export function url(path = ""): string {
   const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   const clean = path.replace(/^\//, "");

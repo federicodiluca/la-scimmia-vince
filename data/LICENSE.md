@@ -4,7 +4,7 @@ I dati in questa cartella sono distribuiti con licenza
 [Creative Commons Attribuzione 4.0 Internazionale (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.it).
 
 Puoi copiarli, ridistribuirli e riutilizzarli, anche a fini commerciali, a condizione di citare la fonte, per
-esempio: *"Dati: La Scimmia Vince (Federico Di Luca), https://federicodiluca.github.io/la-scimmia-vince/"*.
+esempio: *"Dati: La Scimmia Vince (Federico Di Luca), https://lascimmiavince.federicodiluca.com/"*.
 Il testo legale completo è su <https://creativecommons.org/licenses/by/4.0/legalcode.it>.
 
 ## Fonti originali
