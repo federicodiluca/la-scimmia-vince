@@ -89,6 +89,8 @@ ritardi, coppie, forma della sestina (somma, pari/dispari, alti/bassi, consecuti
 
 `src/scimmia/simulate.py`: il simulatore "Se avessi giocato…". Strategie (ritardatari, caldi, freddi, ultima
 sestina, sempre 1-2-3-4-5-6) contro 1.000 scimmie che giocano a caso, con le quote reali di ogni concorso dal 2009.
+La stessa logica gira nel browser (`site/src/lib/simulator.ts`) per chi prova i propri numeri: le due versioni vanno
+tenute allineate.
 
 ## Roadmap
 
@@ -96,8 +98,9 @@ sestina, sempre 1-2-3-4-5-6) contro 1.000 scimmie che giocano a caso, con le quo
 - [x] Fase 2: sito Astro su GitHub Pages (pagine per numero, anno, ritardatari, correlazioni) con favicon e icone a tema
 - [x] Fase 3: simulatore "se avessi giocato…", strategie contro scimmia, correlazioni con meteo e luna
 - [x] Card condivisibili, pagine per ogni estrazione, partite della Nazionale
-- [ ] Poi: Sanremo
-- [ ] Fase 4: Lotto (bot Telegram in stand-by)
+- [x] Simulatore con i tuoi numeri in primo piano, sito rivisto per il telefono, pagina per chi vuole smettere di giocare
+- [ ] Prossimo: Lotteria Italia
+- [ ] In stand-by: Sanremo nelle correlazioni, Lotto, bot Telegram
 
 ## Licenza
 

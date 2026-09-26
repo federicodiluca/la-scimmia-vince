@@ -148,7 +148,7 @@ export interface StrategyResult {
   best_win: number;
   best_win_id: string | null;
   matches: Record<string, number>;
-  unknown_jackpots: number;
+  unknown_wins: number;
   monkeys_better: number;
 }
 
@@ -186,14 +186,4 @@ export interface DrawDetail {
 
 export const details = detailsJson as unknown as Record<string, DrawDetail>;
 
-const MONTHS_IT = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-
-/** "2026-09-24" → "24-settembre": slug della pagina di un'estrazione dentro il suo anno. */
-export function drawSlug(isoDate: string): string {
-  const [, m, d] = isoDate.split("-");
-  return `${Number(d)}-${MONTHS_IT[Number(m) - 1]}`;
-}
-
-export function drawPath(draw: Draw): string {
-  return `estrazioni/${draw.date.slice(0, 4)}/${drawSlug(draw.date)}`;
-}
+export { drawPath, drawSlug } from "./format";

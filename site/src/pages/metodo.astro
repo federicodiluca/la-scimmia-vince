@@ -89,7 +89,10 @@ import { date, dec, int, url } from "../lib/format";
       Una colonna a concorso dal 2009, primo anno con le quote ufficiali. Vincite alle quote reali di ogni concorso per
       2, 3, 4, 5, 5+1 e 6, al lordo delle tasse. Costo 0,50 € a colonna fino al cambio di regolamento di gennaio 2017, poi 1 €:
       la data è ricavata dai dati, cioè dal primo concorso che paga il "2". Le strategie usano solo le informazioni
-      disponibili prima di ogni concorso. Le 1.000 scimmie scelgono 6 numeri a caso a ogni concorso.
+      disponibili prima di ogni concorso. Le 1.000 scimmie scelgono 6 numeri a caso a ogni concorso. Se una giocata centra
+      una categoria che quel giorno nessuno ha centrato (il 5+1 resta senza vincitori in 9 concorsi su 10) non esiste una
+      quota da usare: la vincita è segnalata a parte, con la quota mediana della categoria come riferimento, ed esclusa dai
+      conti.
     </p>
     <h3><Icon name="clock" size={22} /> Ritardi</h3>
     <p>

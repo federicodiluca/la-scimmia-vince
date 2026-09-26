@@ -135,4 +135,23 @@ const byCount = [...numbers].sort((a, b) => b.count - a.count);
     margin-top: 0;
     font-size: 1.2rem;
   }
+  /* telefoni: 5 colonne invece di 3, la griglia dimezza in altezza */
+  @media (max-width: 480px) {
+    .board {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .cell {
+      padding: 8px 2px;
+    }
+    .n {
+      font-size: 1.2rem;
+    }
+    .c {
+      font-size: 0.75rem;
+    }
+    .c small {
+      display: block;
+    }
+  }
 </style>

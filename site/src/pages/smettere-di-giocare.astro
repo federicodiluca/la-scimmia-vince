@@ -1,0 +1,290 @@
+---
+// Pagina per chi vuole smettere di giocare (o aiutare qualcuno a farlo). Tono serio, niente ironia:
+// è l'unica pagina del sito in cui la scimmia non scherza.
+import Layout from "../layouts/Layout.astro";
+import { simulation as sim, summary } from "../lib/data";
+import { eur, int, pct, url } from "../lib/format";
+
+const r = sim.monkeys.returned;
+const firstYear = new Date(sim.first.date).getUTCFullYear();
+const odds = "1 su 622.614.630";
+
+const faq = [
+  {
+    q: "Esiste un metodo per vincere al SuperEnalotto?",
+    a: `No. Ogni estrazione è indipendente dalle precedenti: numeri ritardatari, frequenti o "sistemi" non cambiano le probabilità. Lo abbiamo verificato su tutte le ${int(summary.draws)} estrazioni dal 1997.`,
+  },
+  {
+    q: "Quanto si perde in media giocando al SuperEnalotto?",
+    a: `Nella nostra simulazione con le quote reali dal ${firstYear}, un giocatore tipico recupera circa il ${pct(r["50"]!)} di quello che spende: su 100 € giocati, ne tornano indietro circa ${Math.round(100 * r["50"]!)}. Nove giocatori su dieci recuperano tra il ${pct(r["5"]!)} e il ${pct(r["95"]!)}.`,
+  },
+  {
+    q: "A chi posso rivolgermi per la dipendenza da gioco?",
+    a: "Al Telefono Verde Nazionale dell'Istituto Superiore di Sanità, 800 55 88 22: anonimo e gratuito, dal lunedì al venerdì dalle 10 alle 16. Ti indirizza anche al servizio più vicino per le dipendenze (SerD) della tua ASL.",
+  },
+  {
+    q: "Posso autoescludermi dal gioco?",
+    a: "Per il gioco online sì: con SPID o CIE, sul portale dell'Agenzia delle Dogane e dei Monopoli, ci si iscrive al Registro Unico delle Autoesclusioni, che blocca il gioco presso tutti i concessionari, a tempo o senza scadenza. Per le giocate in ricevitoria il Telefono Verde o il SerD possono aiutarti a trovare strategie concrete.",
+  },
+  {
+    q: "Un mio familiare gioca troppo: cosa posso fare?",
+    a: "Anche i familiari possono chiamare il Telefono Verde 800 55 88 22 per avere informazioni e indicazioni sui servizi. Chiedere aiuto per sé è un buon primo passo anche per aiutare l'altro.",
+  },
+];
+
+const jsonLd = {
+  "@type": "FAQPage",
+  inLanguage: "it-IT",
+  mainEntity: faq.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+const calc = JSON.stringify({ low: r["5"], mid: r["50"], high: r["95"] });
+---
+
+<Layout
+  ogImage="og/smettere-di-giocare.png"
+  title="Smettere di giocare: ludopatia, SuperEnalotto e aiuto"
+  description="Vuoi smettere di giocare al SuperEnalotto o al Lotto? I conti onesti su quanto si perde, perché è difficile smettere e dove chiedere aiuto per la ludopatia: gratis e in anonimato."
+  jsonLd={jsonLd}
+>
+  <h1>Vuoi smettere di giocare?</h1>
+  <p class="lead">
+    Succede a tante persone, e non serve toccare il fondo per chiedere aiuto. Qui trovi i conti onesti su quanto costa giocare e
+    a chi rivolgerti, gratis e in anonimato.
+  </p>
+
+  <section class="card help" aria-labelledby="help-title">
+    <h2 id="help-title">Parlane con qualcuno, anche oggi</h2>
+    <div class="phone">
+      <a class="btn banana call" href="tel:800558822">Chiama 800 55 88 22</a>
+      <p>
+        <strong>Telefono Verde Nazionale per il gioco d'azzardo</strong> dell'Istituto Superiore di Sanità. Anonimo e
+        gratuito, dal lunedì al venerdì dalle 10 alle 16. Anche per familiari e amici.
+      </p>
+    </div>
+    <ul class="links">
+      <li>
+        <a href="https://usciredalgioco.iss.it/web/guest/centri-cura" rel="noopener">Trova il centro di cura più vicino</a>:
+        i servizi per le dipendenze (SerD) delle ASL, gratuiti. La mappa è sul sito <em>Uscire dal gioco</em> dell'ISS, che
+        ha anche informazioni e strumenti per capire a che punto sei.
+      </li>
+      <li>
+        <a href="https://lnx.giocatorianonimi.org/" rel="noopener">Giocatori Anonimi</a>: gruppi di auto-mutuo-aiuto in
+        tutta Italia. Nessuna quota; l'unico requisito è il desiderio di smettere.
+      </li>
+      <li>
+        <a href="https://www.adm.gov.it/portale/en/-/autoesclusione-dal-gioco-a-distan-2" rel="noopener">Autoesclusione dal gioco online</a>:
+        con SPID o CIE blocchi il gioco presso tutti i concessionari, a tempo o senza scadenza (Registro Unico delle
+        Autoesclusioni dell'Agenzia delle Dogane e dei Monopoli).
+      </li>
+    </ul>
+  </section>
+
+  <h2>Quanto ti costa davvero giocare</h2>
+  <p class="prose">
+    Metti quanto giochi di solito. Il conto usa la simulazione di questo sito: {int(sim.players)} giocatori che hanno
+    giocato una colonna a ogni concorso dal {firstYear}, con le quote vere pagate ogni sera.
+  </p>
+  <form class="card calc" data-calc={calc} onsubmit="return false">
+    <div class="fields">
+      <label>
+        Euro a settimana
+        <input type="number" name="week" min="1" max="1000" step="1" value="10" inputmode="numeric" />
+      </label>
+      <label>
+        Per quanti anni
+        <input type="number" name="years" min="1" max="60" step="1" value="10" inputmode="numeric" />
+      </label>
+    </div>
+    <output class="calc-out" aria-live="polite"></output>
+  </form>
+
+  <h2>Perché è così difficile smettere</h2>
+  <p class="prose">
+    Il gioco d'azzardo è costruito per sembrare più vicino alla vincita di quanto sia. Alcune trappole della mente sono
+    comuni a quasi tutti i giocatori, e riconoscerle aiuta.
+  </p>
+  <div class="grid grid-2 traps">
+    <div class="card">
+      <h3>"Ormai deve uscire"</h3>
+      <p>
+        Le palline non hanno memoria. Un numero assente da 100 estrazioni ha la stessa probabilità di uscire di tutti gli
+        altri. <a href={url("ritardatari")}>Lo abbiamo verificato su tutte le estrazioni.</a>
+      </p>
+    </div>
+    <div class="card">
+      <h3>"Ci sono andato vicino"</h3>
+      <p>
+        Fare 5 non significa essere quasi arrivati al 6: la probabilità di centrare la sestina resta {odds}, ogni volta.
+        La "quasi vincita" è la sensazione che spinge di più a rigiocare.
+      </p>
+    </div>
+    <div class="card">
+      <h3>"Devo recuperare"</h3>
+      <p>
+        Giocare per rifarsi delle perdite è il segnale più tipico della dipendenza. In media ogni giocata aggiunge una
+        perdita: più si insegue, più ci si allontana.
+      </p>
+    </div>
+    <div class="card">
+      <h3>"Ho un metodo"</h3>
+      <p>
+        Ritardatari, numeri caldi, sistemi: <a href={url("se-avessi-giocato")}>nessuna strategia batte il caso</a>. Una
+        scimmia che sceglie a caso fa esattamente come chi segue un metodo.
+      </p>
+    </div>
+  </div>
+
+  <h2>Segnali da non sottovalutare</h2>
+  <p class="prose">Se ti riconosci in qualcuno di questi, vale la pena parlarne con qualcuno:</p>
+  <ul class="prose signs">
+    <li>giochi più soldi o più spesso di quanto ti eri promesso;</li>
+    <li>rigiochi per recuperare quello che hai perso;</li>
+    <li>nascondi a chi ti sta vicino quanto giochi o quanto hai speso;</li>
+    <li>chiedi prestiti o rinunci a spese importanti per giocare;</li>
+    <li>ti senti irrequieto o irritabile quando provi a smettere;</li>
+    <li>il gioco ti fa pensare a una via d'uscita dai problemi.</li>
+  </ul>
+  <p class="prose">
+    Il disturbo da gioco d'azzardo (la <em>ludopatia</em>) è una condizione riconosciuta e curabile, non una questione di
+    forza di volontà. In Italia le cure nei servizi pubblici sono gratuite.
+  </p>
+
+  <h2>Domande frequenti</h2>
+  <div class="faq">
+    {
+      faq.map((f) => (
+        <details class="card">
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))
+    }
+  </div>
+
+  <p class="muted small">
+    Questo sito non vende giocate, non ha pubblicità di gioco e non ha legami con operatori di gioco. Le informazioni su
+    servizi e numeri utili vengono dai siti ufficiali dell'Istituto Superiore di Sanità e dell'Agenzia delle Dogane e dei
+    Monopoli.
+  </p>
+</Layout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>(".calc")!;
+  const out = form.querySelector<HTMLOutputElement>(".calc-out")!;
+  const ratio: { low: number; mid: number; high: number } = JSON.parse(form.dataset.calc!);
+  const eur = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0, useGrouping: "always" });
+
+  function update() {
+    const value = (name: string) => Math.max(0, Number(form.querySelector<HTMLInputElement>(`[name=${name}]`)!.value) || 0);
+    const week = value("week");
+    const years = value("years");
+    const spent = week * 52 * years;
+    if (!spent) {
+      out.innerHTML = "";
+      return;
+    }
+    const back = spent * ratio.mid;
+    out.innerHTML = `
+      <p>In ${years} ${years === 1 ? "anno" : "anni"} fanno <strong>${eur.format(spent)}</strong> giocati.</p>
+      <p class="loss">Di solito ne tornano indietro circa ${eur.format(back)}: una perdita di <strong>${eur.format(spent - back)}</strong>.</p>
+      <p class="muted">Nove giocatori su dieci perdono tra ${eur.format(spent * (1 - ratio.high))} e ${eur.format(spent * (1 - ratio.low))}.
+        Giocare più colonne non cambia le proporzioni: si perde di più, allo stesso ritmo.</p>`;
+  }
+  form.addEventListener("input", update);
+  update();
+</script>
+
+<style>
+  .help {
+    border: 2px solid var(--banana);
+    margin: 24px 0 8px;
+  }
+  .help h2 {
+    margin-top: 0;
+  }
+  .phone {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+  }
+  .phone p {
+    margin: 0;
+    flex: 1 1 280px;
+  }
+  .call {
+    font-size: 1.15rem;
+    padding: 14px 22px;
+  }
+  .links {
+    max-width: 72ch;
+    margin: 20px 0 0;
+    padding-left: 1.2em;
+  }
+  .links li + li {
+    margin-top: 10px;
+  }
+  .calc .fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+  }
+  .calc label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+  }
+  .calc input {
+    width: 9ch;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .calc-out {
+    display: block;
+    margin-top: 16px;
+    font-size: 1.1rem;
+  }
+  .calc-out :global(.loss strong) {
+    color: var(--neg);
+    font-size: 1.3em;
+  }
+  .calc-out :global(.muted) {
+    font-size: 0.95rem;
+  }
+  .traps h3 {
+    margin-top: 0;
+  }
+  .traps p {
+    margin: 0;
+  }
+  .signs li + li {
+    margin-top: 4px;
+  }
+  .faq {
+    display: grid;
+    gap: 10px;
+  }
+  .faq summary {
+    cursor: pointer;
+    font-weight: 650;
+  }
+  .faq details p {
+    margin: 10px 0 0;
+  }
+  .small {
+    font-size: 0.9rem;
+    margin-top: 32px;
+  }
+</style>

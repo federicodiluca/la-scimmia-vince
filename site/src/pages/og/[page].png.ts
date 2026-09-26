@@ -30,12 +30,17 @@ const CARDS: Record<string, Card> = {
     ],
   },
   "se-avessi-giocato": {
-    kicker: `Una colonna a concorso dal ${new Date(simulation.first.date).getUTCFullYear()}`,
-    title: "Se avessi giocato…",
+    kicker: `Una colonna a ogni concorso dal ${new Date(simulation.first.date).getUTCFullYear()}`,
+    title: "E se avessi giocato i tuoi numeri?",
     lines: [
       `${dec(simulation.spent, 0)} € spesi. La scimmia mediana ne recupera il ${pct(simulation.monkeys.returned["50"]!)}.`,
-      "Ritardatari e numeri caldi: uguale.",
+      "Scegli 6 numeri e scopri com'è andata.",
     ],
+  },
+  "smettere-di-giocare": {
+    kicker: "Ludopatia · aiuto gratuito e anonimo",
+    title: "Vuoi smettere di giocare?",
+    lines: [`Su 100 € giocati ne tornano circa ${Math.round(100 * simulation.monkeys.returned["50"]!)}.`, "Telefono Verde ISS: 800 55 88 22."],
   },
 };
 

@@ -192,4 +192,10 @@ const sign = (v: number) => (v > 0 ? `+${dec(v, 0)}` : dec(v, 0));
   .sw.cold {
     background: var(--neg);
   }
+  /* telefoni: il grafico scorre, ma quasi in scala 1:1, così etichette e barre restano leggibili e toccabili */
+  @media (max-width: 640px) {
+    .chart-scroll > svg {
+      min-width: 820px;
+    }
+  }
 </style>

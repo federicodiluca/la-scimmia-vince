@@ -146,8 +146,8 @@ def _numbers(draws: pd.DataFrame) -> list[dict]:
     return records
 
 
-def _simulation(data_dir: Path, players: int = 1000, points: int = 240) -> tuple[dict, list] | None:
-    """Strategie contro scimmie (riassunto + curve campionate) e tabella per il simulatore nel browser."""
+def _simulation(data_dir: Path, players: int = 1000, points: int = 240) -> tuple[dict, list, list] | None:
+    """Strategie contro scimmie, tabella per il simulatore nel browser e casi per verificarlo."""
     from scimmia import simulate
 
     try:
@@ -188,7 +188,7 @@ def _simulation(data_dir: Path, players: int = 1000, points: int = 240) -> tuple
                 "best_win": r.best_win,
                 "best_win_id": r.best_win_id,
                 "matches": {str(k): v for k, v in r.matches.items()},
-                "unknown_jackpots": r.unknown_jackpots,
+                "unknown_wins": r.unknown_wins,
                 "monkeys_better": int((final > r.balance[-1]).sum()),
             }
             for r in results
@@ -205,7 +205,7 @@ def _simulation(data_dir: Path, players: int = 1000, points: int = 240) -> tuple
         [row.id, dates[i], [int(getattr(row, c)) for c in ds.NUMBER_COLUMNS], int(row.jolly), float(game.price[i]), prizes[i].tolist()]
         for i, row in enumerate(game.draws.itertuples(index=False))
     ]
-    return summary, table
+    return summary, table, simulate.reference_cases(game)
 
 
 def _context_labels(
@@ -307,8 +307,10 @@ def export_all(out: str | Path = "build/stats", data_dir: Path = DATA_DIR, meteo
 
     sim = _simulation(data_dir)
     if sim is not None:
-        summary, table = sim
+        summary, table, cases = sim
         written.append(_write(out, "simulation", summary))
         # [id, data, sestina, jolly, prezzo, quote 2/3/4/5/5+1/6 (-1 = 6 senza vincitori)]
         written.append(_write(out, "game", {"tiers": ["2", "3", "4", "5", "5+1", "6"], "draws": table}))
+        # risultati di riferimento: `npm test` nel sito controlla che il simulatore JS dia gli stessi
+        written.append(_write(out, "simulator-check", cases))
     return written

@@ -31,3 +31,15 @@ export function url(path = ""): string {
   const clean = path.replace(/^\//, "");
   return clean ? `${base}${clean}`.replace(/\/?$/, clean.includes(".") || clean.includes("#") ? "" : "/") : base;
 }
+
+const MONTHS_IT = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+
+/** "2026-09-24" → "24-settembre": slug della pagina di un'estrazione dentro il suo anno. */
+export function drawSlug(isoDate: string): string {
+  const [, m, d] = isoDate.split("-");
+  return `${Number(d)}-${MONTHS_IT[Number(m) - 1]}`;
+}
+
+export function drawPath(draw: { date: string }): string {
+  return `estrazioni/${draw.date.slice(0, 4)}/${drawSlug(draw.date)}`;
+}

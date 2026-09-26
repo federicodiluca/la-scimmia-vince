@@ -149,4 +149,10 @@ const labelEvery = rows.length > 20 ? 5 : 1;
     height: 2px;
     background: var(--ink);
   }
+  /* telefoni: il grafico scorre a 640px su 900 di disegno, il testo va compensato */
+  @media (max-width: 640px) {
+    .tick {
+      font-size: 16px;
+    }
+  }
 </style>

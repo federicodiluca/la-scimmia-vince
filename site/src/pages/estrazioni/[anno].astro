@@ -79,4 +79,56 @@ const next = years[idx + 1];
     justify-content: space-between;
     margin-top: 24px;
   }
+  /* telefoni: una riga della tabella diventa un blocco, data sopra e palline sotto a tutta larghezza */
+  @media (max-width: 640px) {
+    .card {
+      padding: 4px 16px;
+    }
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    table,
+    tbody {
+      display: block;
+    }
+    tr {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      gap: 6px 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--grid);
+    }
+    tr:last-child {
+      border-bottom: 0;
+    }
+    td {
+      display: block;
+      padding: 0;
+      border: 0;
+    }
+    td.num {
+      text-align: left;
+      color: var(--muted);
+    }
+    td.num::before {
+      content: "n. ";
+    }
+    td br {
+      display: none;
+    }
+    td small::before {
+      content: " · ";
+    }
+    td:last-child {
+      grid-column: 1 / -1;
+    }
+    td :global(.balls) {
+      gap: 6px;
+    }
+  }
 </style>

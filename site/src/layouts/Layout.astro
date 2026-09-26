@@ -36,13 +36,15 @@ const ogImage = new URL(url(og), Astro.site).href;
 const path = Astro.url.pathname;
 
 const nav = [
-  { href: url("numeri"), label: "Numeri" },
   { href: url("se-avessi-giocato"), label: "Se avessi giocato" },
+  { href: url("numeri"), label: "Numeri" },
   { href: url("ritardatari"), label: "Ritardatari" },
   { href: url("correlazioni"), label: "Correlazioni" },
   { href: url("estrazioni"), label: "Archivio" },
   { href: url("metodo"), label: "Metodo" },
 ];
+// staccata dalle altre: non è una sezione di statistiche, è per chi vuole smettere
+const help = { href: url("smettere-di-giocare"), label: "Smettere di giocare", long: "Vuoi smettere di giocare?" };
 
 const graph = [
   {
@@ -90,6 +92,7 @@ const graph = [
     <script is:inline type="application/ld+json" set:html={JSON.stringify(graph)} />
 
     <script is:inline>
+      document.documentElement.classList.add("js");
       try {
         const t = localStorage.getItem("theme");
         if (t) document.documentElement.dataset.theme = t;
@@ -104,7 +107,7 @@ const graph = [
           <Icon name="monkey" size={40} />
           <span>La Scimmia <strong>Vince</strong></span>
         </a>
-        <nav aria-label="Principale">
+        <nav id="site-nav" aria-label="Principale">
           <ul>
             {
               nav.map((item) => (
@@ -115,11 +118,24 @@ const graph = [
                 </li>
               ))
             }
+            <li class="help">
+              <a href={help.href} aria-current={path.startsWith(help.href) ? "page" : undefined}>
+                <span class="short">{help.label}</span>
+                <span class="long">{help.long}</span>
+              </a>
+            </li>
           </ul>
         </nav>
         <button class="theme" type="button" aria-label="Cambia tema chiaro/scuro" title="Tema chiaro/scuro">
           <Icon name="moon" size={22} class="to-dark" />
           <Icon name="sun" size={24} class="to-light" />
+        </button>
+        <button class="menu" type="button" aria-expanded="false" aria-controls="site-nav">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path class="bars" d="M4 7h16M4 12h16M4 17h16" />
+            <path class="cross" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+          <span>Menu</span>
         </button>
       </div>
     </header>
@@ -140,6 +156,7 @@ const graph = [
           Questo sito non vende giocate e non ha legami con operatori di gioco. Se il gioco sta diventando un
           problema: Telefono Verde Nazionale dell'Istituto Superiore di Sanità{" "}
           <a href="tel:800558822">800 55 88 22</a>, anonimo e gratuito, dal lunedì al venerdì dalle 10 alle 16.
+          <a href={url("smettere-di-giocare")}>Vuoi smettere di giocare? Da dove cominciare.</a>
         </p>
         <p class="credits">
           <Icon name="monkey" size={28} />
@@ -167,6 +184,23 @@ const graph = [
         try {
           localStorage.setItem("theme", root.dataset.theme);
         } catch {}
+      });
+
+      // menu su schermi stretti: si apre con il bottone, si chiude con Esc o toccando fuori
+      const menu = document.querySelector<HTMLButtonElement>(".menu")!;
+      const setMenu = (open: boolean) => {
+        menu.setAttribute("aria-expanded", String(open));
+        document.documentElement.classList.toggle("menu-open", open);
+      };
+      menu.addEventListener("click", () => setMenu(menu.getAttribute("aria-expanded") !== "true"));
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && menu.getAttribute("aria-expanded") === "true") {
+          setMenu(false);
+          menu.focus();
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (!(e.target as Element).closest(".site-header")) setMenu(false);
       });
 
       // tooltip dei grafici: qualsiasi elemento con data-tip, al passaggio o al focus
@@ -260,6 +294,16 @@ const graph = [
     text-decoration-thickness: 3px;
     text-underline-offset: 6px;
   }
+  .help {
+    border-left: 1px solid var(--border);
+    padding-left: 18px;
+  }
+  .help a {
+    color: var(--brand);
+  }
+  .help .long {
+    display: none;
+  }
   .theme :global(.to-light) {
     display: none;
   }
@@ -288,15 +332,109 @@ const graph = [
     place-items: center;
     cursor: pointer;
   }
-  @media (max-width: 720px) {
+  .menu {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .menu path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .menu .cross,
+  .menu[aria-expanded="true"] .bars {
+    display: none;
+  }
+  .menu[aria-expanded="true"] .cross {
+    display: inline;
+  }
+  /* sotto i 1100px la barra non ci sta su una riga (ne servono ~1060, più margine per i font di Mac e Android) */
+  @media (max-width: 1100px) {
+    .bar {
+      gap: 10px;
+      min-height: 60px;
+    }
+    .theme {
+      margin-left: auto;
+      width: 40px;
+      height: 40px;
+    }
     nav {
       order: 3;
       margin-left: 0;
       width: 100%;
-      padding-bottom: 10px;
     }
-    .theme {
-      margin-left: auto;
+    nav ul {
+      flex-direction: column;
+      gap: 0;
+      padding-bottom: 8px;
+    }
+    nav li + li {
+      border-top: 1px solid var(--border);
+    }
+    nav li.help {
+      border-left: 0;
+      border-top: 2px solid var(--border);
+      margin-top: 6px;
+      padding-left: 0;
+    }
+    .help .short {
+      display: none;
+    }
+    .help .long {
+      display: inline;
+    }
+    nav a {
+      display: block;
+      padding: 12px 4px;
+      font-size: 1.05rem;
+    }
+    nav a[aria-current="page"] {
+      text-decoration: none;
+      box-shadow: inset 4px 0 0 var(--banana);
+      padding-left: 14px;
+    }
+    /* con JavaScript il menu parte chiuso; senza, resta sempre visibile */
+    :global(html.js) .menu {
+      display: inline-flex;
+    }
+    :global(html.js:not(.menu-open)) nav {
+      display: none;
+    }
+  }
+  /* telefoni: logo, tema e menu devono stare su una riga sola */
+  @media (max-width: 420px) {
+    .logo {
+      font-size: 1.05rem;
+      gap: 8px;
+    }
+    .logo :global(svg) {
+      width: 34px;
+      height: 34px;
+    }
+    .menu {
+      padding: 0;
+      width: 40px;
+      justify-content: center;
+    }
+    .menu span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
   }
   .site-footer {

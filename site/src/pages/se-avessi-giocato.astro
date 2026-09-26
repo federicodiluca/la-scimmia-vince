@@ -3,8 +3,10 @@ import BalancePanel from "../components/BalancePanel.astro";
 import Icon from "../components/Icon.astro";
 import Verdict from "../components/Verdict.astro";
 import Layout from "../layouts/Layout.astro";
+import game from "../data/generated/game.json";
 import { simulation as sim } from "../lib/data";
-import { date, eur, int, pct } from "../lib/format";
+import { date, eur, eurShort, int, pct } from "../lib/format";
+import type { Row } from "../lib/simulator";
 
 const c = sim.curves;
 const all = [...c.monkeys["5"], ...c.monkeys["95"], ...Object.values(c.strategies).flat()];
@@ -12,29 +14,71 @@ const pad = (Math.max(...all) - Math.min(...all)) * 0.06;
 const domain: [number, number] = [Math.min(...all) - pad, Math.max(0, ...all) + pad];
 const band = { low: c.monkeys["5"], mid: c.monkeys["50"], high: c.monkeys["95"] };
 const medianReturn = sim.monkeys.returned["50"]!;
-const years = new Date(sim.last.date).getUTCFullYear() - new Date(sim.first.date).getUTCFullYear();
-const monkeyTable = JSON.stringify(sim.monkeys.final_sorted);
+const firstYear = new Date(sim.first.date).getUTCFullYear();
+const years = new Date(sim.last.date).getUTCFullYear() - firstYear;
 // fuori dalla fascia 5°-95° percentile delle scimmie
 const outside = sim.strategies.filter((s) => s.monkeys_better < sim.players * 0.05 || s.monkeys_better > sim.players * 0.95);
+// la sestina del 6 più ricco: il senno di poi in un bottone
+const rows = game.draws as unknown as Row[];
+const record = rows.reduce((a, b) => (b[5][5]! > a[5][5]! ? b : a));
+const client = JSON.stringify({
+  monkeys: sim.monkeys.final_sorted,
+  band,
+  dates: c.dates,
+  first: sim.first.date,
+  last: sim.last.date,
+});
 ---
 
 <Layout
   ogImage="og/se-avessi-giocato.png"
-  title="Se avessi giocato al SuperEnalotto: simulatore"
-  description={`Quanto avresti vinto giocando al SuperEnalotto dal ${new Date(sim.first.date).getUTCFullYear()} con ritardatari, numeri caldi o i tuoi numeri? Simulazione con le quote reali contro ${int(sim.players)} scimmie.`}
+  title="Quanto avresti vinto al SuperEnalotto con i tuoi numeri"
+  description={`Scegli 6 numeri e scopri quanto avresti vinto, o perso, giocandoli al SuperEnalotto a ogni concorso dal ${firstYear}, con le quote vere. E come se la sono cavata ritardatari e numeri caldi contro ${int(sim.players)} scimmie.`}
 >
-  <h1>Se avessi giocato…</h1>
+  <h1>Se avessi giocato i tuoi numeri…</h1>
   <p class="lead">
-    Una colonna a ogni concorso per {years} anni, dal {date(sim.first.date)} al {date(sim.last.date)}: {int(sim.draws)} giocate,
-    {eur(sim.spent)} spesi. Con le quote vere pagate ogni sera. Cinque strategie "furbe" contro {int(sim.players)} scimmie
-    che scelgono sei numeri a caso ogni volta.
+    Scegli 6 numeri, magari quelli che giochi davvero, e scopri quanto avresti vinto o perso giocandoli a ogni concorso
+    dal {date(sim.first.date)}: {int(sim.draws)} giocate, con le quote vere pagate ogni sera.
   </p>
 
-  <h2>Strategie contro scimmie</h2>
+  <form class="card picker" id="prova" data-sim={client}>
+    <fieldset>
+      <legend>I tuoi 6 numeri <span class="count" aria-live="polite">0/6</span></legend>
+      <div class="pick-grid">
+        {
+          Array.from({ length: 90 }, (_, i) => i + 1).map((n) => (
+            <button type="button" class="pick" data-n={n} aria-pressed="false">
+              {n}
+            </button>
+          ))
+        }
+      </div>
+    </fieldset>
+    <div class="actions">
+      <button type="button" class="btn random"><Icon name="monkey" size={22} /> Scegli come una scimmia</button>
+      <button type="button" class="btn ghost preset" data-picks={record[2].join("-")}>
+        I numeri del 6 da {eurShort(record[5][5]!)}
+      </button>
+      <button type="button" class="btn ghost clear">Azzera</button>
+    </div>
+    <p class="notice" hidden></p>
+    <p class="muted privacy">Il calcolo avviene nel tuo browser: i numeri non vengono inviati da nessuna parte.</p>
+  </form>
+
+  <section class="outcome" aria-live="polite" aria-labelledby="outcome-title">
+    <h2 id="outcome-title" class="visually-hidden">Il tuo risultato</h2>
+    <div class="outcome-body">
+      <p class="muted placeholder">Scegli 6 numeri per vedere com'è andata.</p>
+    </div>
+    <noscript><p class="muted">Il simulatore ha bisogno di JavaScript. Più sotto trovi comunque le strategie già calcolate.</p></noscript>
+  </section>
+
+  <h2>E le strategie "furbe"?</h2>
   <p class="prose">
-    Ogni pannello è il saldo nel tempo di una strategia (la linea blu). La fascia grigia è dove finiscono 9 scimmie su 10,
-    la linea grigia è la scimmia "media". Scende sempre: è quello che resta al giocatore dopo che il banco ha fatto il suo
-    lavoro.
+    Una colonna a ogni concorso per {years} anni, {eur(sim.spent)} spesi. Cinque strategie da manuale del giocatore contro
+    {int(sim.players)} scimmie che scelgono sei numeri a caso ogni volta. Ogni pannello è il saldo nel tempo di una strategia
+    (la linea blu). La fascia grigia è dove finiscono 9 scimmie su 10, la linea grigia è la scimmia "media". Scende sempre:
+    è quello che resta al giocatore dopo che il banco ha fatto il suo lavoro.
   </p>
   <div class="panels">
     {
@@ -97,88 +141,173 @@ const outside = sim.strategies.filter((s) => s.monkeys_better < sim.players * 0.
     </p>
   </Verdict>
 
-  <h2 id="prova">Prova con i tuoi numeri</h2>
-  <p class="prose">
-    Scegli 6 numeri, per esempio quelli che giochi davvero, e scopri come sarebbe andata giocandoli a ogni concorso dal
-    {date(sim.first.date)}. Il calcolo avviene nel tuo browser: i numeri non vengono inviati da nessuna parte.
-  </p>
-
-  <form class="card picker" data-monkeys={monkeyTable} data-players={sim.players}>
-    <fieldset>
-      <legend>I tuoi 6 numeri <span class="count" aria-live="polite">0/6</span></legend>
-      <div class="pick-grid">
-        {
-          Array.from({ length: 90 }, (_, i) => i + 1).map((n) => (
-            <button type="button" class="pick" data-n={n} aria-pressed="false">
-              {n}
-            </button>
-          ))
-        }
-      </div>
-    </fieldset>
-    <div class="actions">
-      <button type="button" class="btn random"><Icon name="monkey" size={22} /> Scegli come una scimmia</button>
-      <button type="button" class="btn ghost clear">Azzera</button>
-    </div>
-    <output class="outcome" aria-live="polite">
-      <p class="muted">Scegli 6 numeri per vedere il risultato.</p>
-    </output>
-  </form>
-
   <p class="muted small">
     Regole della simulazione: una colonna a concorso con la sestina, jolly per il 5+1, niente superstar. Costo 0,50 €
     a colonna fino al {sim.price_change ? date(sim.price_change.date) : "cambio di regolamento"}, poi 1 € (quando è
     arrivato anche il premio per il 2). Vincite alle quote reali di ogni concorso, al lordo delle tasse: un'ipotesi
-    generosa verso il giocatore. Se un 6 cade in un concorso senza vincitori non c'è una quota reale da usare, e la
-    vincita viene indicata a parte.
+    generosa verso il giocatore. Se una giocata centra una categoria che quel giorno nessuno ha centrato (succede spesso
+    con il 5+1) non c'è una quota reale da usare: la vincita viene indicata a parte, con il valore tipico della
+    categoria, e resta fuori dal conto. Vale anche per le scimmie.
   </p>
 </Layout>
 
 <script>
   import game from "../data/generated/game.json";
+  import { balanceChart } from "../lib/balance-chart";
+  import { drawPath, url } from "../lib/format";
+  import { parsePicks, simulate, TIERS, typicalPrize, type Outcome, type Row } from "../lib/simulator";
 
-  type Row = [string, string, number[], number, number, number[]];
   const rows = game.draws as unknown as Row[];
-  const TIERS = game.tiers;
   const eur = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", useGrouping: "always" });
+  const eur0 = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0, useGrouping: "always" });
   const intf = new Intl.NumberFormat("it-IT", { useGrouping: "always" });
-  const pct = new Intl.NumberFormat("it-IT", { style: "percent", maximumFractionDigits: 1 });
+  const cents = new Intl.NumberFormat("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const dateFmt = new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+  const day = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
+  const signed = (v: number) => `${v < 0 ? "−" : "+"}${eur0.format(Math.abs(v))}`;
 
   const form = document.querySelector<HTMLFormElement>(".picker")!;
-  const monkeys: number[] = JSON.parse(form.dataset.monkeys!);
-  const out = form.querySelector<HTMLOutputElement>(".outcome")!;
+  const data: {
+    monkeys: number[];
+    band: { low: number[]; mid: number[]; high: number[] };
+    dates: string[];
+    first: string;
+    last: string;
+  } = JSON.parse(form.dataset.sim!);
+  const body = document.querySelector<HTMLDivElement>(".outcome-body")!;
+  const notice = form.querySelector<HTMLParagraphElement>(".notice")!;
   const count = form.querySelector(".count")!;
   const buttons = [...form.querySelectorAll<HTMLButtonElement>(".pick")];
   const chosen = new Set<number>();
+  // indici dei concorsi campionati nelle curve delle scimmie
+  const rowOf = new Map(rows.map((r, i) => [r[1], i]));
+  const sampled = data.dates.map((d) => rowOf.get(d)!);
+  const typical = TIERS.map((_, t) => typicalPrize(rows, t));
+  const medianMonkey = data.monkeys[data.monkeys.length >> 1]!;
 
-  function simulate(picks: number[]) {
-    let spent = 0;
-    let won = 0;
-    let unknown = 0;
-    let best = { amount: 0, date: "", tier: "" };
-    const byTier: Record<string, { n: number; amount: number }> = {};
-    for (const [, date, numbers, jolly, price, prizes] of rows) {
-      spent += price;
-      const matched = picks.filter((p) => numbers.includes(p)).length;
-      let tier = matched >= 2 ? matched - 2 : -1; // 2→0, 3→1, 4→2, 5→3, 6→5
-      if (matched === 6) tier = 5;
-      if (matched === 5 && picks.includes(jolly)) tier = 4;
-      if (tier < 0) continue;
-      const amount = prizes[tier]!;
-      if (amount === 0) continue; // es. il 2 prima del 2017: non era un premio
-      const label = TIERS[tier]!;
-      byTier[label] ??= { n: 0, amount: 0 };
-      byTier[label].n += 1;
-      if (amount < 0) {
-        unknown += 1;
-        continue;
+  function tierLabel(t: number) {
+    return t === 4 ? "5+1" : `${TIERS[t]}`;
+  }
+
+  function monkeyLine(r: Outcome) {
+    const net = Math.round(r.net);
+    const beaten = data.monkeys.filter((m) => m < net).length;
+    const n = data.monkeys.length;
+    const comment =
+      r.best?.tier === 5
+        ? `Col senno di poi è facile: il ${day(r.best.date)} nessuno sapeva che sarebbero usciti proprio questi.`
+        : beaten > n * 0.95
+          ? "Complimenti alla fortuna: la prossima volta toccherà a un'altra scimmia."
+          : beaten < n * 0.05
+            ? "La scimmia ringrazia."
+            : "Esattamente come una scimmia qualsiasi.";
+    return `<p class="monkeys"><strong>Hai fatto meglio di ${intf.format(beaten)} scimmie su ${intf.format(n)}</strong>
+      che hanno giocato 6 numeri a caso a ogni concorso (la scimmia mediana: ${signed(medianMonkey)}). ${comment}</p>`;
+  }
+
+  function renderOutcome(r: Outcome) {
+    const perEuro = r.won / r.spent;
+    const tierRows = TIERS.map((_, t) => t)
+      .reverse()
+      .map((t) => {
+        const x = r.byTier[t]!;
+        const paid = x.hits - x.unknown;
+        return `<tr${x.hits ? "" : ' class="none"'}>
+          <td>Punti ${tierLabel(t)}${t === 0 ? ' <span class="muted">(dal 2017)</span>' : ""}</td>
+          <td class="num">${x.hits ? intf.format(x.hits) : "–"}</td>
+          <td class="num">${paid ? eur.format(x.amount) : x.unknown ? "quota ignota" : "–"}</td>
+        </tr>`;
+      })
+      .join("");
+    const unknown = r.unknown.length
+      ? `<div class="unknown">
+          <p><strong>${r.unknown.length === 1 ? "Una vincita senza quota" : `${r.unknown.length} vincite senza quota`}.</strong>
+          ${r.unknown.length === 1 ? "In questo concorso" : "In questi concorsi"} nessuno ha centrato la categoria, quindi non esiste una quota
+          da usare e ${r.unknown.length === 1 ? "la vincita resta" : "le vincite restano"} fuori dal conto:</p>
+          <ul>${r.unknown
+            .map(
+              (w) =>
+                `<li><a href="${url(drawPath(w))}">${day(w.date)}</a>: punti ${tierLabel(w.tier)}. Di solito vale circa ${eur0.format(typical[w.tier]!)}.</li>`,
+            )
+            .join("")}</ul>
+        </div>`
+      : "";
+    const best = r.best
+      ? `<p>La vincita più alta: <strong>${eur.format(r.best.amount!)}</strong> con il ${tierLabel(r.best.tier)}, il
+          <a href="${url(drawPath(r.best))}">${day(r.best.date)}</a>.</p>`
+      : "<p>Nemmeno un 2 in tutti questi anni. Succede.</p>";
+
+    body.innerHTML = `
+      <div class="card result">
+        <p class="kicker">${r.picks.map((n) => `<span class="ball sm">${n}</span>`).join("")}</p>
+        <p class="big ${r.net < 0 ? "loss" : "gain"}">${signed(r.net)}</p>
+        <p class="sub">Dal ${day(data.first)} al ${day(data.last)} avresti speso <strong>${eur.format(r.spent)}</strong>
+          e vinto <strong>${eur.format(r.won)}</strong>. Ogni euro giocato te ne avrebbe restituiti
+          <strong>${cents.format(perEuro)}</strong>.</p>
+        <div class="result-grid">
+          <figure class="chart">
+            <figcaption>Il saldo nel tempo, contro ${intf.format(data.monkeys.length)} scimmie</figcaption>
+            <div class="chart-box"></div>
+            <p class="legend"><span><span class="key you"></span> i tuoi numeri</span>
+              <span><span class="key mid"></span> scimmia mediana</span>
+              <span><span class="key band"></span> 9 scimmie su 10</span></p>
+          </figure>
+          <div>
+            <table class="tiers">
+              <thead><tr><th>Categoria</th><th class="num">Volte</th><th class="num">Vinto</th></tr></thead>
+              <tbody>${tierRows}</tbody>
+            </table>
+            ${best}
+          </div>
+        </div>
+        ${unknown}
+        ${monkeyLine(r)}
+        <div class="share">
+          <button type="button" class="btn share-btn">Condividi il risultato</button>
+          <span class="share-status muted" role="status"></span>
+        </div>
+        <p class="help-link muted">Giochi davvero e questi conti ti preoccupano?
+          <a href="${url("smettere-di-giocare")}">Qui trovi aiuto, gratis e in anonimato</a>.</p>
+      </div>`;
+    body.querySelector(".share-btn")!.addEventListener("click", () => share(r));
+    last = r;
+    drawChart();
+  }
+
+  // il grafico si ridisegna alla larghezza reale del suo riquadro
+  let last: Outcome | null = null;
+  function drawChart() {
+    const box = body.querySelector<HTMLDivElement>(".chart-box");
+    if (!box || !last) return;
+    box.innerHTML = balanceChart({
+      dates: data.dates,
+      values: sampled.map((i) => last!.balance[i]!),
+      band: data.band,
+      label: `Saldo di ${last.picks.join(" ")}`,
+      width: box.clientWidth,
+    });
+  }
+  let resizing = 0;
+  addEventListener("resize", () => {
+    cancelAnimationFrame(resizing);
+    resizing = requestAnimationFrame(drawChart);
+  });
+
+  async function share(r: Outcome) {
+    const status = body.querySelector(".share-status")!;
+    const verb = r.net < 0 ? `avrei perso ${eur0.format(-r.net)}` : `avrei guadagnato ${eur0.format(r.net)}`;
+    const text = `Giocando ${r.picks.join(" ")} a ogni concorso dal ${new Date(data.first).getUTCFullYear()} ${verb}. E tu?`;
+    const link = location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Se avessi giocato i miei numeri…", text, url: link });
+        return;
       }
-      won += amount;
-      byTier[label].amount += amount;
-      if (amount > best.amount) best = { amount, date, tier: label };
+      await navigator.clipboard.writeText(`${text} ${link}`);
+      status.textContent = "Link copiato.";
+    } catch (e) {
+      if ((e as Error).name !== "AbortError") status.textContent = `Copia questo link: ${link}`;
     }
-    return { spent, won, unknown, best, byTier };
   }
 
   function render() {
@@ -188,27 +317,24 @@ const outside = sim.strategies.filter((s) => s.monkeys_better < sim.players * 0.
       b.setAttribute("aria-pressed", String(on));
       b.disabled = !on && chosen.size >= 6;
     }
-    if (chosen.size < 6) {
-      out.innerHTML = `<p class="muted">Scegli ancora ${6 - chosen.size} ${6 - chosen.size === 1 ? "numero" : "numeri"}.</p>`;
+    const picks = [...chosen].sort((a, b) => a - b);
+    history.replaceState(null, "", picks.length === 6 ? `?n=${picks.join("-")}` : location.pathname);
+    if (picks.length < 6) {
+      const left = 6 - picks.length;
+      last = null;
+      body.innerHTML = `<p class="muted placeholder">${
+        picks.length ? `Scegli ancora ${left} ${left === 1 ? "numero" : "numeri"}.` : "Scegli 6 numeri per vedere com'è andata."
+      }</p>`;
       return;
     }
-    const picks = [...chosen].sort((a, b) => a - b);
-    const r = simulate(picks);
-    const net = r.won - r.spent;
-    const beaten = monkeys.filter((m) => m < net).length;
-    const tiers = TIERS.filter((t) => r.byTier[t])
-      .map((t) => `<li><strong>Punti ${t}</strong>: ${intf.format(r.byTier[t]!.n)} ${r.byTier[t]!.n === 1 ? "volta" : "volte"}, ${eur.format(r.byTier[t]!.amount)}</li>`)
-      .join("");
-    out.innerHTML = `
-      <p class="headline">Con <strong>${picks.join(" · ")}</strong> avresti speso <strong>${eur.format(r.spent)}</strong> e vinto
-        <strong>${eur.format(r.won)}</strong>: ${net >= 0 ? "saldo positivo di" : "ci avresti rimesso"} <strong>${eur.format(Math.abs(net))}</strong>
-        (hai recuperato il ${pct.format(r.won / r.spent)}).</p>
-      ${tiers ? `<ul>${tiers}</ul>` : "<p>Nemmeno un 2. Succede.</p>"}
-      ${r.best.amount ? `<p>Vincita più alta: ${eur.format(r.best.amount)} con il ${r.best.tier}, il ${dateFmt.format(new Date(r.best.date + "T00:00:00Z"))}.</p>` : ""}
-      ${r.unknown ? `<p><strong>Avresti fatto 6 in un concorso senza vincitori!</strong> Quella vincita non ha una quota reale ed è esclusa dal conto.</p>` : ""}
-      <p>Hai fatto meglio di <strong>${intf.format(beaten)} scimmie su ${intf.format(monkeys.length)}</strong>. ${
-        beaten > monkeys.length * 0.9 ? "Complimenti alla fortuna." : beaten < monkeys.length * 0.1 ? "La scimmia ringrazia." : "Esattamente come una scimmia qualsiasi."
-      }</p>`;
+    renderOutcome(simulate(rows, picks));
+  }
+
+  function setPicks(picks: number[]) {
+    chosen.clear();
+    for (const n of picks) chosen.add(n);
+    notice.hidden = true;
+    render();
   }
 
   for (const b of buttons) {
@@ -216,32 +342,35 @@ const outside = sim.strategies.filter((s) => s.monkeys_better < sim.players * 0.
       const n = Number(b.dataset.n);
       if (chosen.has(n)) chosen.delete(n);
       else if (chosen.size < 6) chosen.add(n);
+      notice.hidden = true;
       render();
     });
   }
   form.querySelector(".random")!.addEventListener("click", () => {
-    chosen.clear();
-    while (chosen.size < 6) chosen.add(1 + Math.floor(Math.random() * 90));
-    render();
+    const picks = new Set<number>();
+    while (picks.size < 6) picks.add(1 + Math.floor(Math.random() * 90));
+    setPicks([...picks]);
   });
-  form.querySelector(".clear")!.addEventListener("click", () => {
-    chosen.clear();
-    render();
+  form.querySelector<HTMLButtonElement>(".preset")!.addEventListener("click", (e) => {
+    setPicks((e.currentTarget as HTMLButtonElement).dataset.picks!.split("-").map(Number));
   });
+  form.querySelector(".clear")!.addEventListener("click", () => setPicks([]));
+
+  // numeri dal link condiviso o dal form della home
+  const fromUrl = parsePicks(location.search);
+  setPicks(fromUrl.picks);
+  if (fromUrl.invalid) {
+    notice.hidden = false;
+    notice.textContent = `Nel link c'erano numeri non validi o ripetuti: servono 6 numeri diversi da 1 a 90. ${
+      fromUrl.picks.length ? "Abbiamo tenuto quelli buoni, completa tu la sestina." : ""
+    }`;
+  }
+  if (fromUrl.picks.length === 6) document.querySelector(".outcome")!.scrollIntoView({ block: "start" });
 </script>
 
 <style>
-  .panels {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-  }
-  .results {
-    margin-top: 16px;
-  }
-  .monkey-row td {
-    font-weight: 650;
-    background: var(--surface-2);
+  .picker {
+    margin-top: 24px;
   }
   fieldset {
     border: 0;
@@ -287,33 +416,185 @@ const outside = sim.strategies.filter((s) => s.monkeys_better < sim.players * 0.
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin: 16px 0;
+    margin: 16px 0 8px;
   }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font: inherit;
-    font-weight: 650;
-    padding: 10px 16px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    background: var(--ink);
-    color: var(--page);
-    cursor: pointer;
+  .notice {
+    background: color-mix(in srgb, var(--neg) 12%, transparent);
+    border-radius: 10px;
+    padding: 8px 12px;
   }
-  .btn.ghost {
-    background: transparent;
-    color: var(--ink);
-    border-color: var(--border);
+  .privacy {
+    font-size: 0.9rem;
+    margin: 8px 0 0;
   }
+
   .outcome {
+    margin-top: 16px;
+    scroll-margin-top: 16px;
+  }
+  .placeholder {
+    text-align: center;
+    padding: 12px 0;
+  }
+  .outcome :global(.result .kicker) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 8px;
+  }
+  .outcome :global(.big) {
+    font-size: clamp(2.6rem, 9vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    margin: 0 0 8px;
+  }
+  .outcome :global(.big.loss) {
+    color: var(--neg);
+  }
+  .outcome :global(.big.gain) {
+    color: var(--brand);
+  }
+  .outcome :global(.sub) {
+    font-size: 1.1rem;
+    max-width: 62ch;
+  }
+  .outcome :global(.result-grid) {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 24px;
+    align-items: start;
+    margin: 20px 0 8px;
+  }
+  @media (max-width: 760px) {
+    .outcome :global(.result-grid) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .outcome :global(.chart) {
+    margin: 0;
+  }
+  .outcome :global(.chart figcaption) {
+    font-weight: 650;
+    margin-bottom: 4px;
+  }
+  .outcome :global(.chart svg) {
     display: block;
+    width: 100%;
+    height: auto;
+  }
+  .outcome :global(.chart .grid) {
+    stroke: var(--grid);
+  }
+  .outcome :global(.chart .zero) {
+    stroke: var(--axis);
+  }
+  .outcome :global(.chart .tick) {
+    fill: var(--muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .outcome :global(.chart .band) {
+    fill: var(--band);
+  }
+  .outcome :global(.chart .mid) {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .outcome :global(.chart .series) {
+    fill: none;
+    stroke: var(--series-1);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .outcome :global(.chart .end) {
+    fill: var(--series-1);
+    stroke: var(--surface);
+    stroke-width: 2;
+  }
+  .outcome :global(.chart .hit) {
+    fill: transparent;
+  }
+  .outcome :global(.chart .hit:hover) {
+    fill: color-mix(in srgb, var(--series-1) 8%, transparent);
+  }
+  .outcome :global(.legend) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    color: var(--ink-2);
+    font-size: 0.85rem;
+    margin: 6px 0 0;
+  }
+  .outcome :global(.legend > span) {
+    white-space: nowrap;
+  }
+  .outcome :global(.key) {
+    display: inline-block;
+    width: 16px;
+    height: 10px;
+    border-radius: 3px;
+    margin-left: 6px;
+  }
+  .outcome :global(.key.you) {
+    background: var(--series-1);
+    height: 3px;
+  }
+  .outcome :global(.key.mid) {
+    background: var(--muted);
+    height: 3px;
+  }
+  .outcome :global(.key.band) {
+    background: var(--band);
+    box-shadow: inset 0 0 0 1px var(--axis);
+  }
+  .outcome :global(.tiers) {
+    margin-bottom: 12px;
+  }
+  .outcome :global(.tiers tr.none td) {
+    color: var(--muted);
+  }
+  .outcome :global(.unknown) {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 8px 0 16px;
+  }
+  .outcome :global(.unknown ul) {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+  .outcome :global(.monkeys) {
     border-top: 1px solid var(--border);
     padding-top: 14px;
   }
-  .outcome :global(.headline) {
-    font-size: 1.1rem;
+  .outcome :global(.help-link) {
+    font-size: 0.95rem;
+    margin: 16px 0 0;
+  }
+  .outcome :global(.share) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .results {
+    margin-top: 16px;
+  }
+  .monkey-row td {
+    font-weight: 650;
+    background: var(--surface-2);
   }
   .small {
     font-size: 0.9rem;

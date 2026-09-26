@@ -138,4 +138,9 @@ const zones = dates.map((_, i) => i).filter((i) => i % zoneStep === 0);
   .hit:hover {
     fill: color-mix(in srgb, var(--series-1) 8%, transparent);
   }
+  @media (max-width: 640px) {
+    .tick {
+      font-size: 13px;
+    }
+  }
 </style>

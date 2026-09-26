@@ -322,3 +322,38 @@ details[open] > summary .icon {
 .pager a .icon {
   vertical-align: -4px;
 }
+
+/* ---- bottoni -------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 650;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--ink);
+  color: var(--page);
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--border);
+}
+.btn.banana {
+  background: var(--banana);
+  color: var(--banana-ink);
+}
+
+/* testo solo per gli screen reader */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

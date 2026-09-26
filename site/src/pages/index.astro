@@ -4,7 +4,7 @@ import FrequencyChart from "../components/FrequencyChart.astro";
 import Icon from "../components/Icon.astro";
 import Verdict from "../components/Verdict.astro";
 import Layout from "../layouts/Layout.astro";
-import { drawPath, frequency, honesty, summary } from "../lib/data";
+import { drawPath, frequency, honesty, simulation, summary } from "../lib/data";
 import { date, dec, eur, eurShort, il, int, pct, url, weekday } from "../lib/format";
 
 const last = summary.last_draw;
@@ -19,6 +19,8 @@ const lateHits = late.reduce((s, b) => s + b.hits, 0);
 const lateOpp = late.reduce((s, b) => s + b.opportunities, 0);
 const years = new Date(summary.last_draw.date).getUTCFullYear() - new Date(summary.first_date).getUTCFullYear();
 const jackpot = summary.jackpot;
+const same = simulation.strategies.find((s) => s.key === "sempre_uguali");
+const simYear = new Date(simulation.first.date).getUTCFullYear();
 
 const sections = [
   { href: url("se-avessi-giocato"), icon: "banana", title: "Se avessi giocato…", text: "Ritardatari, numeri caldi, sempre gli stessi: quanto avresti vinto dal 2009 con le quote vere? E con i tuoi numeri?" },
@@ -43,6 +45,56 @@ const sections = [
       </p>
     </div>
     <Icon name="monkey" size={180} class="hero-monkey" />
+  </section>
+
+  <section class="card try" aria-labelledby="try-title">
+    <div class="try-text">
+      <h2 id="try-title">E se avessi giocato i tuoi numeri?</h2>
+      <p>
+        Scrivi i 6 numeri che giochi, o che giocheresti: ti diciamo quanto avresti vinto, o perso, giocandoli a ogni
+        concorso dal {simYear}. Con le quote vere.
+      </p>
+      {
+        same && (
+          <p class="muted">
+            Chi ha giocato sempre 1 2 3 4 5 6 ha speso {eur(same.spent)} e ne ha ripresi {eur(same.won)}.
+          </p>
+        )
+      }
+    </div>
+    <form class="try-form" action={url("se-avessi-giocato")} method="get">
+      <fieldset>
+        <legend class="visually-hidden">I tuoi 6 numeri, da 1 a 90</legend>
+        <div class="try-inputs">
+          {
+            Array.from({ length: 6 }, (_, i) => (
+              <input
+                type="number"
+                name="n"
+                min="1"
+                max="90"
+                step="1"
+                inputmode="numeric"
+                enterkeyhint={i < 5 ? "next" : "go"}
+                autocomplete="off"
+                required
+                aria-label={`Numero ${i + 1}`}
+                placeholder="·"
+              />
+            ))
+          }
+        </div>
+      </fieldset>
+      <div class="try-actions">
+        <button class="btn banana" type="submit">
+          <Icon name="banana" size={22} /> Scopri com'è andata
+        </button>
+        <button class="btn ghost try-random" type="button">
+          <Icon name="monkey" size={22} /> A caso
+        </button>
+      </div>
+      <a class="grid-link" href={`${url("se-avessi-giocato")}#prova`}>Preferisci toccarli? Scegli sulla griglia</a>
+    </form>
   </section>
 
   <section class="card last" aria-labelledby="last-title">
@@ -130,11 +182,158 @@ const sections = [
         È come indovinare un preciso secondo in un periodo di quasi 20 anni. Ogni estrazione, ogni combinazione: sempre la
         stessa probabilità, qualunque cosa sia uscita prima.
       </p>
+      <p class="help-link">
+        Il gioco sta diventando un problema, per te o per qualcuno vicino?
+        <a href={url("smettere-di-giocare")}>Ecco da dove cominciare per smettere</a>.
+      </p>
     </div>
   </section>
 </Layout>
 
+<script>
+  const tryForm = document.querySelector<HTMLFormElement>(".try-form")!;
+  const inputs = [...tryForm.querySelectorAll<HTMLInputElement>(".try-inputs input")];
+
+  // numeri ripetuti: il browser controlla solo 1-90, i doppioni li segnaliamo noi
+  function checkDuplicates() {
+    for (const el of inputs) {
+      const dup = el.value !== "" && inputs.some((o) => o !== el && o.value !== "" && Number(o.value) === Number(el.value));
+      el.setCustomValidity(dup ? "Questo numero c'è già: servono 6 numeri diversi." : "");
+    }
+  }
+  function fill(numbers: number[]) {
+    inputs.forEach((el, i) => (el.value = numbers[i] ? String(numbers[i]) : ""));
+    checkDuplicates();
+  }
+
+  inputs.forEach((input, i) => {
+    const next = inputs[i + 1];
+    input.addEventListener("input", () => {
+      checkDuplicates();
+      // due cifre scritte: si passa alla casella dopo
+      if (input.value.length >= 2 && input.validity.valid && next && next.value === "") next.focus();
+    });
+    input.addEventListener("keydown", (e) => {
+      // "Avanti"/Invio della tastiera del telefono: casella dopo, e dall'ultima si invia
+      if (e.key === "Enter" && next) {
+        e.preventDefault();
+        next.focus();
+      }
+      if (e.key === "Backspace" && input.value === "" && i > 0) {
+        e.preventDefault();
+        inputs[i - 1]!.focus();
+      }
+    });
+    // incollare "7 13 22 45 68 81" riempie tutte le caselle
+    input.addEventListener("paste", (e) => {
+      const found = (e.clipboardData?.getData("text") ?? "").match(/\d+/g)?.map(Number) ?? [];
+      if (found.length < 2) return;
+      e.preventDefault();
+      fill(found.slice(0, 6));
+    });
+  });
+
+  tryForm.querySelector(".try-random")!.addEventListener("click", () => {
+    const picks = new Set<number>();
+    while (picks.size < 6) picks.add(1 + Math.floor(Math.random() * 90));
+    fill([...picks].sort((a, b) => a - b));
+    tryForm.querySelector<HTMLButtonElement>("[type=submit]")!.focus();
+  });
+</script>
+
 <style>
+  .try {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px 32px;
+    align-items: center;
+    border: 2px solid var(--banana);
+    margin-bottom: 32px;
+  }
+  .try h2 {
+    margin: 0 0 0.5rem;
+  }
+  .try-text p:last-child {
+    margin: 0;
+  }
+  .try-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .try-form fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .try-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 52px));
+    gap: 6px;
+  }
+  .try-inputs input {
+    width: 100%;
+    aspect-ratio: 1;
+    min-width: 0;
+    font-size: 1.1rem;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    padding: 0;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .try-inputs input::-webkit-outer-spin-button,
+  .try-inputs input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .try-inputs input:not(:placeholder-shown) {
+    background: var(--banana);
+    color: var(--banana-ink);
+    border-color: #b8860b;
+  }
+  .try-inputs input:not(:placeholder-shown):invalid {
+    background: color-mix(in srgb, var(--neg) 18%, var(--surface-2));
+    color: var(--ink);
+    border-color: var(--neg);
+  }
+  .try-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .grid-link {
+    font-size: 0.95rem;
+    padding: 4px 0;
+  }
+  /* telefoni: il form prende tutta la larghezza, le caselle si dividono lo spazio e non escono mai dal bordo */
+  @media (max-width: 760px) {
+    .try {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 16px;
+    }
+    .try-form {
+      align-items: stretch;
+    }
+    .try-inputs {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      max-width: 360px;
+    }
+    /* i bottoni non vanno mai a capo: se non c'è spazio si impilano a tutta larghezza */
+    .try-actions .btn {
+      flex: 1 1 auto;
+      justify-content: center;
+      white-space: nowrap;
+    }
+  }
   .hero {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -154,12 +353,32 @@ const sections = [
     height: auto;
     transform: rotate(-6deg);
   }
+  /* telefoni: la scimmia piccola accanto al titolo, così il simulatore resta nel primo schermo */
   @media (max-width: 640px) {
     .hero {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .hero > div {
+      display: contents;
+    }
+    .kicker {
+      grid-column: 1 / -1;
     }
     :global(.hero-monkey) {
-      order: -1;
+      grid-column: 2;
+      grid-row: 2;
+      width: 72px;
+    }
+    .hero h1 {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .hero .lead {
+      grid-column: 1 / -1;
+      font-size: 1.05rem;
     }
   }
   .last {
@@ -199,6 +418,9 @@ const sections = [
     margin-top: 40px;
   }
   .odds h2 {
+    margin: 0;
+  }
+  .help-link {
     margin: 0;
   }
   .odds-value {

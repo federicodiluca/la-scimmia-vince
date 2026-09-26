@@ -6,8 +6,9 @@ Regole della simulazione:
   al lordo delle tasse sulle vincite: un'ipotesi generosa verso il giocatore;
 - costo della giocata: 0,50 € fino al cambio di regolamento, 1 € dal primo concorso che
   paga il "Punti 2" (gennaio 2017): la data è ricavata dai dati, non scritta a mano;
-- se una strategia centra un 6 in un concorso senza vincitori non c'è una quota da
-  usare: la vincita resta sconosciuta ed è segnalata a parte (non è mai successo).
+- se una giocata centra una categoria che quel giorno non ha avuto vincitori (capita al
+  5+1 in 9 concorsi su 10, al 6 quasi sempre, qualche volta al 5) non c'è una quota da
+  usare: la vincita resta sconosciuta, esclusa dai conti e segnalata a parte.
 """
 
 from __future__ import annotations
@@ -36,7 +37,7 @@ class Game:
     """Estrazioni con quote, allineate per indice."""
 
     draws: pd.DataFrame  # solo i concorsi con quote, ordinati
-    prizes: np.ndarray  # (concorsi, 6) quota per categoria, 0 se nessuna quota, nan se 6 senza vincitori
+    prizes: np.ndarray  # (concorsi, 6) quota per categoria, 0 se la categoria non esisteva, nan se senza vincitori
     price: np.ndarray  # (concorsi,) costo di una colonna
     hits: np.ndarray  # (concorsi, 90) bool
     history: pd.DataFrame  # tutte le estrazioni dal 1997, per le strategie che guardano il passato
@@ -63,12 +64,11 @@ def load_game(data_dir=DATA_DIR) -> Game:
     table = table.reindex(index=draws["id"], columns=TIERS)
     winners = winners.reindex(index=draws["id"], columns=TIERS)
     amounts = table.to_numpy(dtype=float, copy=True)  # con il copy-on-write di pandas la vista è in sola lettura
-    # categoria inesistente all'epoca (es. Punti 2 prima del 2017) o senza vincitori: 0,
-    # tranne il 6 senza vincitori, che resta ignoto (nan)
-    no_quote = np.isnan(amounts)
-    amounts[no_quote] = 0.0
-    six = TIERS.index("Punti 6")
-    amounts[:, six] = np.where(winners["Punti 6"].fillna(0).to_numpy() > 0, amounts[:, six], np.nan)
+    # categoria inesistente all'epoca (es. Punti 2 prima del 2017): 0, non era un premio;
+    # categoria senza vincitori quel giorno: quota ignota (nan), chi l'avesse centrata avrebbe vinto
+    count = winners.to_numpy(dtype=float)
+    amounts[np.isnan(count)] = 0.0
+    amounts[count == 0] = np.nan
 
     has_two = winners["Punti 2"].notna().to_numpy()
     change = int(np.argmax(has_two)) if has_two.any() else len(draws)
@@ -146,7 +146,7 @@ class Result:
     label: str
     spent: float
     won: float
-    unknown_jackpots: int
+    unknown_wins: int
     best_win: float
     best_win_id: str | None
     matches: dict[int, int]
@@ -167,7 +167,7 @@ def run(game: Game, key: str, label: str, picks: np.ndarray) -> Result:
         label=label,
         spent=float(game.price.sum()),
         won=float(won.sum()),
-        unknown_jackpots=unknown,
+        unknown_wins=unknown,
         best_win=float(won[best]),
         best_win_id=game.draws["id"].iloc[best] if won[best] > 0 else None,
         matches={k: int((matched == k).sum()) for k in range(7)},
@@ -187,3 +187,41 @@ def simulate_all(game: Game, players: int = 1000, seed: int = 90, chunk: int = 2
         won, _ = payouts(game, monkeys(game, min(chunk, players - start), rng))
         balances.append(np.cumsum(np.nan_to_num(won) - game.price, axis=1))
     return results, np.concatenate(balances)
+
+
+def reference_cases(game: Game, n_random: int = 200, seed: int = 6) -> list[dict]:
+    """Risultati di giocate fisse, per verificare che il simulatore del browser faccia gli stessi conti.
+
+    Oltre a sestine casuali include i casi limite presi dai dati veri: un 6 con vincitori, un 5+1 e
+    un 5 in concorsi senza vincitori (quota ignota), un 2 prima e dopo il 2017.
+    """
+    rng = np.random.default_rng(seed)
+    cases = [np.sort(rng.choice(np.arange(1, MAX_NUMBER + 1), 6, replace=False)).tolist() for _ in range(n_random)]
+    cases.append([1, 2, 3, 4, 5, 6])
+    numbers = game.draws[NUMBER_COLUMNS].to_numpy()
+    jolly = game.draws["jolly"].to_numpy()
+    six, five, five_one = TIERS.index("Punti 6"), TIERS.index("Punti 5"), FIVE_PLUS_ONE
+    for i in np.flatnonzero(~np.isnan(game.prizes[:, six]))[:3]:
+        cases.append(numbers[i].tolist())
+    for i in np.flatnonzero(np.isnan(game.prizes[:, five_one]))[:3]:
+        cases.append(sorted([*numbers[i][:5].tolist(), int(jolly[i])]))
+    for i in np.flatnonzero(np.isnan(game.prizes[:, five]))[:3]:
+        other = next(x for x in range(1, MAX_NUMBER + 1) if x not in numbers[i] and x != jolly[i])
+        cases.append(sorted([*numbers[i][:5].tolist(), other]))
+
+    out = []
+    for picks in cases:
+        r = run(game, "", "", np.tile(np.array(picks), (len(game.draws), 1)))
+        out.append(
+            {
+                "picks": [int(p) for p in picks],
+                "spent": r.spent,
+                "won": round(r.won, 2),
+                "unknown": r.unknown_wins,
+                "best": r.best_win,
+                "best_id": r.best_win_id,
+                "matches": {str(k): v for k, v in r.matches.items()},
+                "balance_mid": round(float(r.balance[len(r.balance) // 2]), 2),
+            }
+        )
+    return out
