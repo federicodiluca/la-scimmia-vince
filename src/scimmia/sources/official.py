@@ -143,7 +143,7 @@ class OfficialClient:
             timeout=30,
             follow_redirects=True,
             headers={
-                "User-Agent": "Mozilla/5.0 (compatible; LaScimmiaVince/0.1; +https://github.com/federicodiluca/la-scimmia-vince)",
+                "User-Agent": "Mozilla/5.0 (compatible; LaScimmiaVince/0.1; +https://lascimmiavince.federicodiluca.com/; lascimmiavince@federicodiluca.com)",
                 "Accept-Language": "it-IT,it;q=0.9",
             },
         )

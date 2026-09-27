@@ -109,6 +109,10 @@ tenute allineate.
   ufficiali, Open-Meteo, international_results) restano dei rispettivi titolari: i dettagli sono in
   [data/LICENSE.md](data/LICENSE.md).
 
+## Contatti
+
+Segnalazioni, errori nei dati o idee: <lascimmiavince@federicodiluca.com> oppure una issue su GitHub.
+
 ---
 
 Il gioco può causare dipendenza patologica. Questo progetto non invita a giocare, anzi.
