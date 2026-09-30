@@ -164,7 +164,9 @@ const graph = [
             Un progetto di <a href="https://federicodiluca.com/" rel="author">Federico Di Luca</a>, indipendente e open
             source · <a href="https://federicodiluca.com/progetti/">guarda i miei altri progetti</a> ·{" "}
             <a href="https://github.com/federicodiluca/la-scimmia-vince">codice e dati su GitHub</a> ·{" "}
-            <a href="mailto:lascimmiavince@federicodiluca.com">scrivimi</a>
+            <a href="mailto:lascimmiavince@federicodiluca.com">scrivimi</a> ·{" "}
+            <a id="share-story" href={url("og/storia.png")} download="la-scimmia-vince.png"
+              title="Immagine per le storie di Instagram, con il link al sito">condividi</a>
           </span>
         </p>
         <p class="muted">SuperEnalotto è un marchio registrato dei rispettivi titolari.</p>
@@ -231,6 +233,36 @@ const graph = [
       });
       document.addEventListener("focusout", hide);
       document.addEventListener("scroll", hide, { passive: true });
+
+      // «condividi» nel footer: senza menu di condivisione il link scarica l'immagine per le
+      // storie (og/storia.png); con il menu del telefono la passa lì, e si sceglie Instagram →
+      // Storia. Il file si scarica quando il footer entra in vista, così al tocco è già pronto:
+      // Safari rifiuta la condivisione se tra il tocco e la chiamata c'è un'attesa di rete.
+      const shareLink = document.querySelector<HTMLAnchorElement>("#share-story");
+      if (shareLink && navigator.canShare) {
+        let storyFile: File | undefined;
+        const observer = new IntersectionObserver((entries) => {
+          if (!entries[0]!.isIntersecting) return;
+          observer.disconnect();
+          fetch(shareLink.href)
+            .then((r) => (r.ok ? r.blob() : null))
+            .then((blob) => {
+              if (blob) storyFile = new File([blob], "la-scimmia-vince.png", { type: "image/png" });
+            })
+            .catch(() => {});
+        });
+        observer.observe(shareLink);
+        shareLink.addEventListener("click", (e) => {
+          if (!storyFile || !navigator.canShare({ files: [storyFile] })) return; // download normale
+          e.preventDefault();
+          navigator
+            .share({
+              files: [storyFile],
+              text: `La Scimmia Vince: statistiche oneste sul SuperEnalotto.\n${location.origin}/`,
+            })
+            .catch(() => {});
+        });
+      }
     </script>
   </body>
 </html>
