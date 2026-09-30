@@ -56,11 +56,14 @@ uv run pytest                    # test
 ## Sito
 
 Il sito è in `site/` ([Astro](https://astro.build), tutto statico) ed è pubblicato su
-<https://lascimmiavince.federicodiluca.com/>. Le pagine (home, 90 schede numero, archivio per anno,
-ritardatari, correlazioni, metodo) si generano dai JSON prodotti da `scimmia stats`. I grafici sono SVG generati
-in fase di build: si leggono anche senza JavaScript e hanno sempre una tabella dati accanto.
+<https://lascimmiavince.federicodiluca.com/>. Le pagine (home, 90 schede numero, archivio per anno
+e per singola estrazione, ritardatari, correlazioni, simulatore "Se avessi giocato…", smettere di giocare, metodo)
+si generano dai JSON prodotti da `scimmia stats`. I grafici sono SVG generati in fase di build: si leggono anche
+senza JavaScript e hanno sempre una tabella dati accanto. Le card di anteprima per la condivisione (`og/*.png`)
+sono generate anch'esse in fase di build, come l'immagine per le storie di Instagram (`og/storia.png`, il
+simulatore "Se avessi giocato…" col grafico del saldo) che il link «condividi» nel footer passa al menu di condivisione del telefono.
 
-Serve Node ≥ 22.12 (vedi `site/.nvmrc`).
+Serve Node ≥ 22.12 (vedi `engines` in `site/package.json`).
 
 ```bash
 uv run scimmia stats --out site/src/data/generated   # dati per il sito
@@ -68,6 +71,7 @@ cd site
 npm ci
 npm run dev                                           # http://localhost:4321/
 npm run build                                         # icone PNG + sito statico in site/dist
+npm test                                              # il simulatore TS fa gli stessi conti di quello Python
 ```
 
 Deploy: `.github/workflows/deploy-site.yml` a ogni push su `main`, e dopo ogni aggiornamento dei dati.
@@ -90,7 +94,8 @@ ritardi, coppie, forma della sestina (somma, pari/dispari, alti/bassi, consecuti
 `src/scimmia/simulate.py`: il simulatore "Se avessi giocato…". Strategie (ritardatari, caldi, freddi, ultima
 sestina, sempre 1-2-3-4-5-6) contro 1.000 scimmie che giocano a caso, con le quote reali di ogni concorso dal 2009.
 La stessa logica gira nel browser (`site/src/lib/simulator.ts`) per chi prova i propri numeri: le due versioni vanno
-tenute allineate.
+tenute allineate, e `npm test` in `site/` le confronta sui casi di riferimento che `scimmia stats` scrive in
+`simulator-check.json`.
 
 ## Roadmap
 
