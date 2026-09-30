@@ -13,7 +13,7 @@ const beating = sim.strategies.filter((s) => s.monkeys_better < sim.players * 0.
 export const GET: APIRoute = async () =>
   pngResponse(
     await renderStory({
-      kicker: `Una colonna a ogni concorso dal ${firstYear}`,
+      kicker: `Scopri quanto avresti vinto dal ${firstYear}`,
       intro: [
         `${int(sim.draws)} concorsi, ${int(Math.round(sim.spent))} € spesi. Cinque strategie`,
         `da manuale contro ${int(sim.players)} scimmie che giocano a caso.`,
