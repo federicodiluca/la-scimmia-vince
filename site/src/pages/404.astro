@@ -9,6 +9,10 @@ import { url } from "../lib/format";
     <Icon name="banana" size={96} />
     <h1>Questa pagina è uscita dall'urna</h1>
     <p class="lead">Anzi, non c'è mai entrata. Prova dalla <a href={url()}>home</a> o dai <a href={url("numeri")}>90 numeri</a>.</p>
+    <p class="odds muted">
+      Probabilità di trovarla riprovando a caso: più o meno le stesse del 6, cioè 1 su 622.614.630.
+      La scimmia, per la cronaca, ci sta ancora provando.
+    </p>
   </div>
 </Layout>
 
@@ -19,5 +23,10 @@ import { url } from "../lib/format";
   }
   .nf .lead {
     margin: 0 auto;
+  }
+  .nf .odds {
+    max-width: 34em;
+    margin: 1.5em auto 0;
+    font-size: 0.9em;
   }
 </style>
