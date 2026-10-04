@@ -56,3 +56,11 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+      # Bing e gli altri motori IndexNow: avvisati subito delle pagine cambiate (non blocca il deploy se fallisce)
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: site/scripts
+      - name: Ping IndexNow
+        continue-on-error: true
+        run: node site/scripts/indexnow.mjs

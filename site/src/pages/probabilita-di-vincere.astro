@@ -1,0 +1,228 @@
+---
+import Verdict from "../components/Verdict.astro";
+import Layout from "../layouts/Layout.astro";
+import game from "../data/generated/game.json";
+import { simulation as sim } from "../lib/data";
+import { date, dec, eurCents, eurShort, int, pct, url } from "../lib/format";
+import type { Row } from "../lib/simulator";
+
+// coefficiente binomiale esatto: C(90,6) sta comodo nei numeri interi di JavaScript
+const C = (n: number, k: number): number => {
+  let r = 1;
+  for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
+  return Math.round(r);
+};
+const TOTAL = C(90, 6);
+// combinazioni che fanno esattamente k punti; il 5+1 è il 5 con il sesto numero uguale al jolly (1 degli 84 rimasti)
+const ways = {
+  "6": 1,
+  "5+1": C(6, 5),
+  "5": C(6, 5) * 83,
+  "4": C(6, 4) * C(84, 2),
+  "3": C(6, 3) * C(84, 3),
+  "2": C(6, 2) * C(84, 4),
+};
+const tiers = ["6", "5+1", "5", "4", "3", "2"] as const;
+const odds = (t: (typeof tiers)[number]) => oneIn(ways[t] / TOTAL);
+const anyWin = tiers.reduce((s, t) => s + ways[t], 0) / TOTAL;
+const oneIn = (p: number) => int(Math.round(1 / p));
+
+// quote reali dal cambio di prezzo (1 € a colonna): la mediana, perché un solo 6 da 371 milioni sposta tutto
+const rows = game.draws as unknown as Row[];
+const tierIndex = (t: string) => (game.tiers as string[]).indexOf(t);
+const median = (xs: number[]) => {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m]! : (s[m - 1]! + s[m]!) / 2;
+};
+const recent = rows.filter((r) => r[4] === 1);
+const quota = Object.fromEntries(
+  tiers.map((t) => {
+    const paid = recent.map((r) => r[5][tierIndex(t)]!).filter((v) => v > 0);
+    return [t, paid.length ? median(paid) : null];
+  }),
+) as Record<string, number | null>;
+const quotaLabel = (t: string) => {
+  const q = quota[t];
+  if (q == null) return "–";
+  return q < 100_000 ? eurCents(q) : eurShort(q);
+};
+
+// quante volte è uscito il 6 nei concorsi con le quote (dal 2009)
+const sixes = rows.filter((r) => r[5][tierIndex("6")]! > 0);
+const record = sixes.reduce((a, b) => (b[5][5]! > a[5][5]! ? b : a));
+
+// teoria contro realtà: le 5 strategie del simulatore, una colonna a concorso
+const plays = sim.strategies.length * sim.draws;
+const observed = (k: number) => sim.strategies.reduce((s, x) => s + (x.matches[String(k)] ?? 0), 0);
+const exactly = (k: number) => (C(6, k) * C(84, 6 - k)) / TOTAL;
+
+const DRAWS_PER_YEAR = 4 * 52;
+const yearsForSix = TOTAL / DRAWS_PER_YEAR;
+const medianReturn = sim.monkeys.returned["50"]!;
+
+const faq = [
+  {
+    q: "Qual è la probabilità di fare 6 al SuperEnalotto?",
+    a: `1 su ${int(TOTAL)} con una colonna: sono tutte le combinazioni possibili di 6 numeri su 90, e ne vince una sola.`,
+  },
+  {
+    q: "Qual è la probabilità di vincere qualcosa al SuperEnalotto?",
+    a: `Con una colonna vinci almeno il 2 una volta su ${dec(1 / anyWin, 0)} circa (${pct(anyWin)}). Quasi sempre è il 2, che paga pochi euro.`,
+  },
+  {
+    q: "Giocare i numeri ritardatari o i numeri più usciti aumenta le probabilità?",
+    a: "No. Ogni combinazione ha la stessa probabilità a ogni estrazione, qualunque cosa sia uscita prima. Lo abbiamo verificato su tutte le estrazioni dal 1997.",
+  },
+  {
+    q: "Come si aumentano davvero le probabilità di vincere?",
+    a: "Solo giocando più colonne: 10 colonne valgono 10 volte la probabilità, e costano 10 volte tanto. Anche i sistemi sono solo tante colonne messe insieme.",
+  },
+];
+---
+
+<Layout
+  ogImage="og/probabilita-di-vincere.png"
+  title="Probabilità di vincere al SuperEnalotto: i conti veri"
+  description={`Fare 6 al SuperEnalotto: 1 su ${int(TOTAL)}. Le probabilità di ogni categoria (5+1, 5, 4, 3, 2), le quote reali e quanto ci vorrebbe per vincere giocando a ogni concorso.`}
+  jsonLd={{
+    "@type": "FAQPage",
+    inLanguage: "it-IT",
+    mainEntity: faq.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  }}
+>
+  <h1>Le probabilità di vincere al SuperEnalotto</h1>
+  <p class="lead">
+    Le combinazioni possibili di 6 numeri su 90 sono {int(TOTAL)}. Ne vince una. Tutto il resto, dai sistemi ai numeri
+    ritardatari, non cambia questo conto di una virgola.
+  </p>
+
+  <h2>Le probabilità di ogni categoria</h2>
+  <p class="prose">
+    Probabilità con una colonna (1 €) a un concorso. La quota tipica è la mediana di quanto è stato pagato dal{" "}
+    {date(sim.price_change?.date ?? recent[0]![1])}, da quando la colonna costa 1 €: ogni concorso fa storia a sé,
+    perché il montepremi si divide tra i vincitori.
+  </p>
+  <div class="card table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Punti</th>
+          <th class="num">Combinazioni vincenti</th>
+          <th class="num">Probabilità</th>
+          <th class="num">Quota tipica</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          tiers.map((t) => (
+            <tr>
+              <td>
+                <strong>{t}</strong>
+              </td>
+              <td class="num">{int(ways[t])}</td>
+              <td class="num">1 su {odds(t)}</td>
+              <td class="num">{quotaLabel(t)}</td>
+            </tr>
+          ))
+        }
+        <tr>
+          <td>Almeno 2</td>
+          <td class="num">{int(Math.round(anyWin * TOTAL))}</td>
+          <td class="num">1 su {dec(1 / anyWin, 1)}</td>
+          <td class="num"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose muted">
+    Il 5+1 è un 5 in cui il sesto numero giocato è uguale al jolly, estratto tra gli 84 numeri rimasti. Con la
+    SuperStar (un numero da 1 a 90, 50 centesimi in più) il "6 stella" è 1 su {int(TOTAL * 90)}.
+  </p>
+
+  <h2>Quanto ci vorrebbe</h2>
+  <div class="grid grid-3">
+    <div class="card tile">
+      <div class="label">Anni per aspettarsi un 6, con una colonna a ogni concorso</div>
+      <div class="value">{dec(yearsForSix / 1e6, 1)} milioni</div>
+      <p class="note">A {DRAWS_PER_YEAR} concorsi l'anno (4 a settimana).</p>
+    </div>
+    <div class="card tile">
+      <div class="label">Costo per giocare tutte le combinazioni</div>
+      <div class="value">{eurShort(TOTAL)}</div>
+      <p class="note">
+        Il 6 più ricco della storia, il {date(record[1])}, ha pagato {eurShort(record[5][5]!)}. Non basta neanche
+        quello.
+      </p>
+    </div>
+    <div class="card tile">
+      <div class="label">Una combinazione al secondo, senza mai fermarsi</div>
+      <div class="value">{dec(TOTAL / (365.25 * 24 * 3600), 1)} anni</div>
+      <p class="note">per scriverle tutte. Il 6 è una sola di loro.</p>
+    </div>
+  </div>
+
+  <h2>Ma allora perché qualcuno fa 6?</h2>
+  <p class="prose">
+    Perché a ogni concorso si giocano milioni di colonne. Dal 2009 il 6 è uscito in {sixes.length} concorsi su{" "}
+    {int(rows.length)}, uno ogni {int(Math.round(rows.length / sixes.length))} circa. Che qualcuno vinca è quasi sicuro
+    sul lungo periodo; che sia tu, no. È la stessa differenza che c'è tra "qualcuno nel mondo oggi compie gli anni" e
+    "oggi compi gli anni tu".
+  </p>
+
+  <h2>Teoria contro realtà</h2>
+  <p class="prose">
+    Le probabilità sopra sono conti, non statistiche. Ma si possono controllare: le{" "}
+    {sim.strategies.length} strategie del <a href={url("se-avessi-giocato")}>simulatore</a> (ritardatari, numeri caldi,
+    freddi, sempre 1 2 3 4 5 6…) hanno giocato una colonna a ogni concorso dal{" "}
+    {new Date(sim.first.date).getUTCFullYear()}: {int(plays)} giocate in tutto.
+  </p>
+  <div class="card table-scroll">
+    <table>
+      <thead>
+        <tr><th>Numeri indovinati</th><th class="num">Attese per caso</th><th class="num">Successe davvero</th></tr>
+      </thead>
+      <tbody>
+        {
+          [0, 1, 2, 3, 4, 5, 6].map((k) => (
+            <tr>
+              <td>{k}</td>
+              <td class="num">{dec(plays * exactly(k), k >= 4 ? 2 : 0)}</td>
+              <td class="num">{int(observed(k))}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <Verdict>
+    <p>
+      <strong>La scimmia dice:</strong> nessuna strategia batte i conti. E i conti dicono che su 100 € giocati, a una
+      scimmia che gioca a caso dal {new Date(sim.first.date).getUTCFullYear()} ne sono tornati circa{" "}
+      {Math.round(100 * medianReturn)}. Ai ritardatari e ai numeri caldi è andata allo stesso modo.
+    </p>
+  </Verdict>
+
+  <h2>Domande frequenti</h2>
+  <div class="prose faq">
+    {
+      faq.map((f) => (
+        <>
+          <h3>{f.q}</h3>
+          <p>{f.a}</p>
+        </>
+      ))
+    }
+    <p>
+      Per approfondire: <a href={url("ritardatari")}>il mito del ritardatario</a>,{" "}
+      <a href={url("numeri")}>frequenze e ritardi dei 90 numeri</a>,{" "}
+      <a href={url("correlazioni")}>le correlazioni assurde</a>. Se il gioco sta diventando un problema:{" "}
+      <a href={url("smettere-di-giocare")}>da dove cominciare per smettere</a>.
+    </p>
+  </div>
+</Layout>

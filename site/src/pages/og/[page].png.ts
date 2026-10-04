@@ -37,6 +37,11 @@ const CARDS: Record<string, Card> = {
       "Scegli 6 numeri e scopri com'è andata.",
     ],
   },
+  "probabilita-di-vincere": {
+    kicker: "Probabilità di vincere al SuperEnalotto",
+    title: "1 su 622.614.630.",
+    lines: ["Una colonna a ogni concorso: un 6 ogni 3 milioni di anni.", "Ritardatari e numeri caldi non cambiano il conto."],
+  },
   "smettere-di-giocare": {
     kicker: "Ludopatia · aiuto gratuito e anonimo",
     title: "Vuoi smettere di giocare?",
