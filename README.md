@@ -57,7 +57,7 @@ uv run pytest                    # test
 
 Il sito è in `site/` ([Astro](https://astro.build), tutto statico) ed è pubblicato su
 <https://lascimmiavince.federicodiluca.com/>. Le pagine (home, 90 schede numero, archivio per anno
-e per singola estrazione, ritardatari, correlazioni, simulatore "Se avessi giocato…", smettere di giocare, metodo)
+e per singola estrazione, ritardatari, correlazioni, simulatore "Se avessi giocato…", probabilità di vincere, smettere di giocare, metodo)
 si generano dai JSON prodotti da `scimmia stats`. I grafici sono SVG generati in fase di build: si leggono anche
 senza JavaScript e hanno sempre una tabella dati accanto. Le card di anteprima per la condivisione (`og/*.png`)
 sono generate anch'esse in fase di build, come l'immagine per le storie di Instagram (`og/storia.png`, il
