@@ -1,0 +1,6 @@
+Ciao! Prova una cosa: «Se avessi giocato…».
+
+Scegli 6 numeri e il simulatore li gioca a ogni concorso del SuperEnalotto dal 2009, con le quote vere, e ti dice quanto avresti vinto o perso. Con sempre 1-2-3-4-5-6, per esempio: 2.298,50 € spesi, 472,90 € ripresi.
+Il calcolo avviene nel tuo browser, i numeri non vanno da nessuna parte. Non è un invito a giocare, anzi.
+
+👉 https://lascimmiavince.federicodiluca.com/se-avessi-giocato
