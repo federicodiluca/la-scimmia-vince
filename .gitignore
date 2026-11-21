@@ -8,3 +8,6 @@ dist/
 
 # copia locale dell archivio TuttoSuperenalotto (non ridistribuita)
 data/raw/
+
+# materiale promozionale (post, messaggi, storie): solo in locale
+/social/
